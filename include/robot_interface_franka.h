@@ -8,9 +8,9 @@
 #include <franka/robot.h>
 #include <franka/gripper.h>
 #include <franka/exception.h>
-#include "MotionGenerator.h"
+#include "motion_generator.h"
 #include <thread>
-#include "QuadraticProgramMotionGenerator.h"
+#include "quadratic_program_motion_generator.h"
 #include <dqrobotics/robots/FrankaEmikaPandaRobot.h>
 #include <atomic>
 

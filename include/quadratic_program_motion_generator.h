@@ -6,7 +6,7 @@
 #include <iostream>
 #include <dqrobotics/solvers/DQ_QPOASESSolver.h>
 #include <memory>
-#include "ConstraintsManager.h"
+#include "constraints_manager.h"
 
 
 using namespace DQ_robotics;

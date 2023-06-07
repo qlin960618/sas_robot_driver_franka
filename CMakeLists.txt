@@ -43,6 +43,8 @@ add_library(MotionGenerator src/motion_generator.cpp)
 target_link_libraries(MotionGenerator Franka::Franka)
 
 
+add_library(ConstraintsManager constraints_manager/src/constraints_manager.cpp)
+
 add_library(QuadraticProgramMotionGenerator src/quadratic_program_motion_generator.cpp)
 target_link_libraries(QuadraticProgramMotionGenerator
                        qpOASES
@@ -71,6 +73,7 @@ include_directories(
     include
     src/
     ${catkin_INCLUDE_DIRS}
+    constraints_manager/include
     )
 
 

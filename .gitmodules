@@ -1,0 +1,3 @@
+[submodule "constraints_manager"]
+	path = constraints_manager
+	url = https://github.com/juanjqo/constraints_manager.git
