@@ -7,8 +7,8 @@ QuadraticProgramMotionGenerator::QuadraticProgramMotionGenerator(const double &s
                                                                  const Eigen::VectorXd &q_goal)
 {
     n_links_ = _get_dimensions(q_initial, q_dot_initial, q_goal);
-    solver_ = std::make_unique<DQ_QPOASESSolver>(DQ_QPOASESSolver());
-    constraints_manager_ = std::make_unique<ConstraintsManager>(ConstraintsManager(n_links_));
+    solver_ = std::make_unique<DQ_QPOASESSolver>();
+    constraints_manager_ = std::make_unique<ConstraintsManager>(n_links_);
     _check_gains();
     q_ = q_initial;
     q_dot_ = q_dot_initial;
