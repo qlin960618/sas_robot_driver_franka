@@ -367,7 +367,7 @@ void RobotInterfaceFranka::_start_joint_position_control_mode()
     trajectory_generator_sptr_ =
         std::make_unique<QuadraticProgramMotionGenerator>(1.0, q, q_dot, q);
 
-    double n2 = 2;
+    double n2 = 0.8;
     double n1 = 1000*std::sqrt(n2);
     VectorXd K2 = (VectorXd(7)<<n2, n2, n2, n2, n2, n2, n2).finished();
     VectorXd K1 = (VectorXd(7)<<n1, n1, n1, n1, 3*n1, 3*n1, 3*n1).finished();
