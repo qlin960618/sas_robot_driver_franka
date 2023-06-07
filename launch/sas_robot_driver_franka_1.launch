@@ -1,0 +1,5 @@
+<launch>
+<rosparam file="$(find sas_robot_driver_franka)/cfg/sas_robot_driver_franka_1.yaml" command="load"/>
+<node pkg="sas_robot_driver_franka" type="sas_robot_driver_franka_node" name="franka_1">
+</node>
+</launch>
