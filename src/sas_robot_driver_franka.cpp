@@ -17,8 +17,28 @@ namespace sas
         end_effector_pose_homogenous_transformation_buffer_.resize(10,0);
         std::cout<<configuration.ip_address<<std::endl;
 
+        RobotInterfaceFranka::MODE mode = RobotInterfaceFranka::MODE::None;
+
+        std::cout<<configuration.mode<<std::endl;
+
+        if (configuration_.mode == std::string("None"))
+        {
+            mode = RobotInterfaceFranka::MODE::None;
+        }else if (configuration_.mode == std::string("PositionControl"))
+        {
+            mode = RobotInterfaceFranka::MODE::PositionControl;
+        }else if (configuration_.mode == std::string("VelocityControl"))
+        {
+            mode = RobotInterfaceFranka::MODE::VelocityControl;
+        }else
+        {
+            throw std::runtime_error(std::string("Wrong mode. ") + std::string("You used ") + configuration_.mode
+                                     + std::string(". However, you must use None, PositionControl or VelocityControl"));
+        }
+
+
         robot_driver_interface_sptr_ = std::make_shared<RobotInterfaceFranka>(configuration.ip_address,
-                                                                        RobotInterfaceFranka::MODE::VelocityControl, //None, PositionControl
+                                                                        mode, //None, PositionControl, VelocityControl
                                                                         RobotInterfaceFranka::HAND::ON);
     }
 

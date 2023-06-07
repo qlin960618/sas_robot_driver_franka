@@ -22,6 +22,7 @@ namespace sas
 struct RobotDriverFrankaConfiguration
 {
     std::string ip_address;
+    std::string mode;
     int port;
     double speed;
 };
@@ -42,20 +43,7 @@ private:
     std::vector<double> end_effector_pose_euler_buffer_;
     std::vector<double> end_effector_pose_homogenous_transformation_buffer_;
 
-    //DQ _homogenous_vector_to_dq(const VectorXd& homogenousvector) const;
-    //VectorXd _dq_to_homogenous_vector(const DQ& pose) const;
-    //VectorXd _get_end_effector_pose_homogenous_transformation();
-    //double _sign(const double &a) const;
 
-  //  void _connect(); //Throws std::runtime_error()
-
-   // void _motor_on(); //Throws std::runtime_error()
-   // void _motor_off() noexcept; //No exceptions should be thrown in the path to turn off the robot
-
-   // void _set_speed(const float& speed, const float& acceleration, const float& deacceleration); //Throws std::runtime_error()
-
-   // void _slave_mode_on(int mode); //Throws std::runtime_error()
-    //void _slave_mode_off() noexcept; //No exceptions should be thrown in the path to turn off the robot
 
 public:
     const static int SLAVE_MODE_JOINT_CONTROL;

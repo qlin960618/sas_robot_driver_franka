@@ -41,29 +41,13 @@ int main(int argc, char **argv)
     sas::RobotDriverFrankaConfiguration robot_driver_franka_configuration;
 
     sas::get_ros_param(nh,"/robot_ip_address",robot_driver_franka_configuration.ip_address);
-   // sas::get_ros_param(nh,"/robot_port",      robot_driver_franka_configuration.port);
-    //sas::get_ros_param(nh,"/robot_speed",     robot_driver_franka_configuration.speed);
-
-    //robot_driver_franka_configuration.ip_address = "172.16.0.2";
-    //robot_driver_franka_configuration.port =  0;
-    //robot_driver_franka_configuration.speed = 0.0;
+    sas::get_ros_param(nh,"/robot_mode",      robot_driver_franka_configuration.mode, false);
 
     sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
 
     sas::get_ros_param(nh,"/thread_sampling_time_nsec",robot_driver_ros_configuration.thread_sampling_time_nsec);
     sas::get_ros_param(nh,"/q_min",robot_driver_ros_configuration.q_min);
     sas::get_ros_param(nh,"/q_max",robot_driver_ros_configuration.q_max);
-
-    //auto qmin = sas::std_vector_double_to_vectorxd(robot_driver_ros_configuration.q_min);
-    //auto qmax = sas::std_vector_double_to_vectorxd(robot_driver_ros_configuration.q_max);
-
-
-    //std::vector<double> q_min = {-2.3093,-1.5133,-2.4937, -2.7478,-2.4800, 0.8521, -2.6895};
-    //std::vector<double> q_max = { 2.3093, 1.5133, 2.4937, -0.4461, 2.4800, 4.2094,  2.6895};
-
-    //robot_driver_ros_configuration.thread_sampling_time_nsec = 4000000;
-    //robot_driver_ros_configuration.q_min = q_min;
-    //robot_driver_ros_configuration.q_max = q_max;
 
     robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
     
