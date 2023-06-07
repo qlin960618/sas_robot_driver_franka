@@ -31,8 +31,8 @@ QuadraticProgramMotionGenerator::QuadraticProgramMotionGenerator(const double &s
 QuadraticProgramMotionGenerator::QuadraticProgramMotionGenerator(const double &speed_factor, const VectorXd &q_dot_initial, const VectorXd &q_dot_goal)
 {
     n_links_ = _get_dimensions(q_dot_initial, q_dot_initial, q_dot_goal);
-    solver_ = std::make_unique<DQ_QPOASESSolver>(DQ_QPOASESSolver());
-    constraints_manager_ = std::make_unique<ConstraintsManager>(ConstraintsManager(n_links_));
+    solver_ = std::make_unique<DQ_QPOASESSolver>();
+    constraints_manager_ = std::make_unique<ConstraintsManager>(n_links_);
     _check_gains();
     q_dot_ = q_dot_initial;
 
@@ -94,7 +94,7 @@ void QuadraticProgramMotionGenerator::_check_sizes(const Eigen::VectorXd &q1,
                                                    const Eigen::VectorXd &q2,
                                                    const Eigen::VectorXd &q3) const
 {
-    if (q1.size() != q2.size() or q1.size() != q3.size() or q2.size() != q3.size())
+    if (q1.size() != q2.size() or q1.size() != q3.size())
     {
         throw std::runtime_error(std::string("Wrong sizes in vectors. "));
     }
