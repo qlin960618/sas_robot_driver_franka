@@ -5,7 +5,7 @@ project(sas_robot_driver_franka)
 # add_compile_options(-std=c++11)
 #add_compile_options(-std=c++11)
 add_compile_options(-Werror=return-type)
-add_definitions(-D_USE_LINUX_API)
+
 
 #Add custom (non compiling) targets so launch scripts and python files show up in QT Creator's project view.
 file(GLOB_RECURSE EXTRA_FILES */*)
@@ -27,7 +27,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES sas_robot_driver_denso
   CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver
 )
 
