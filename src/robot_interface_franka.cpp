@@ -1,3 +1,35 @@
+/*
+# Copyright (c) 2023 Juan Jose Quiroz Omana
+#
+#    This file is part of sas_robot_driver_franka.
+#
+#    sas_robot_driver_franka is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    sas_robot_driver_franka is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with sas_robot_driver.  If not, see <https://www.gnu.org/licenses/>.
+#
+# ################################################################
+#
+#   Author: Juan Jose Quiroz Omana, email: juanjqogm@gmail.com
+#
+# ################################################################
+#
+# Contributors:
+#      1. Juan Jose Quiroz Omana (juanjqogm@gmail.com)
+#         - Original implementation
+#
+# ################################################################
+*/
+
+
 #include "robot_interface_franka.h"
 
 
@@ -364,6 +396,8 @@ void RobotInterfaceFranka::_start_joint_position_control_mode()
 
     VectorXd q_dot = VectorXd::Zero(7);
     _update_status_message("Starting joint position control mode EXPERIMENTAL",verbose_);
+
+    /*
     trajectory_generator_sptr_ =
         std::make_unique<QuadraticProgramMotionGenerator>(1.0, q, q_dot, q);
 
@@ -372,11 +406,12 @@ void RobotInterfaceFranka::_start_joint_position_control_mode()
     VectorXd K2 = (VectorXd(7)<<n2, n2, n2, n2, n2, n2, n2).finished();
     VectorXd K1 = (VectorXd(7)<<n1, n1, n1, n1, 3*n1, 3*n1, 3*n1).finished();
     trajectory_generator_sptr_->set_diagonal_gains(K1, K2);
+    */
+
+    custom_generator_sptr_ = std::make_unique<CustomMotionGeneration>(0.9, q, q_dot, q);
+    custom_generator_sptr_->set_proportional_gain(1.0);
 
     finish_motion_ = false;
-
-    int retry_counter = 0;
-    int TIMEOUT_IN_MILISECONDS = 5000;
 
         try {
             robot_sptr_->control( //------------------------------------------------------------
@@ -385,7 +420,7 @@ void RobotInterfaceFranka::_start_joint_position_control_mode()
                     time += period.toSec();
                     double T = period.toSec();
 
-                    auto new_q = trajectory_generator_sptr_->compute_new_configuration(desired_joint_positions_, T);
+                    auto new_q = custom_generator_sptr_->compute_new_configuration(desired_joint_positions_, T);
 
 
                     if (time == 0.0) {
@@ -420,8 +455,8 @@ void RobotInterfaceFranka::_start_joint_position_control_mode()
             std::cout << e.what() << std::endl;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT_IN_MILISECONDS));
-        retry_counter++;
+
+
 
 }
 

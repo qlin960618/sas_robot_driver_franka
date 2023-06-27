@@ -61,13 +61,19 @@ target_link_libraries(QuadraticProgramMotionGenerator
                        dqrobotics
                        ConstraintsManager)
 
+add_library(CustomMotionGeneration src/custom_motion_generation.cpp)
+target_link_libraries(CustomMotionGeneration
+                        qpOASES
+                        dqrobotics
+                        ConstraintsManager)
 
 
 add_library(robot_interface_franka src/robot_interface_franka.cpp)
 target_link_libraries(robot_interface_franka Franka::Franka
                       dqrobotics
                       MotionGenerator
-                      QuadraticProgramMotionGenerator)
+                      QuadraticProgramMotionGenerator
+                      CustomMotionGeneration)
 
 
 

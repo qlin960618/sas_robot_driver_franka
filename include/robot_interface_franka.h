@@ -1,3 +1,35 @@
+/*
+# Copyright (c) 2023 Juan Jose Quiroz Omana
+#
+#    This file is part of sas_robot_driver_franka.
+#
+#    sas_robot_driver_franka is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    sas_robot_driver_franka is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public License
+#    along with sas_robot_driver.  If not, see <https://www.gnu.org/licenses/>.
+#
+# ################################################################
+#
+#   Author: Juan Jose Quiroz Omana, email: juanjqogm@gmail.com
+#
+# ################################################################
+#
+# Contributors:
+#      1. Juan Jose Quiroz Omana (juanjqogm@gmail.com)
+#         - Original implementation
+#
+# ################################################################
+*/
+
+
 #pragma once
 
 #include <dqrobotics/DQ.h>
@@ -13,6 +45,7 @@
 #include "quadratic_program_motion_generator.h"
 #include <dqrobotics/robots/FrankaEmikaPandaRobot.h>
 #include <atomic>
+#include "custom_motion_generation.h"
 
 using namespace DQ_robotics;
 using namespace Eigen;
@@ -63,6 +96,7 @@ private:
     std::shared_ptr<franka::Robot> robot_sptr_;
     std::shared_ptr<franka::Gripper> gripper_sptr_;
     std::unique_ptr<QuadraticProgramMotionGenerator> trajectory_generator_sptr_;
+    std::unique_ptr<CustomMotionGeneration> custom_generator_sptr_;
 
     void _setDefaultRobotBehavior();
     //bool hand_enabled_ = false;
