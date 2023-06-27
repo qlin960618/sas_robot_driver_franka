@@ -473,6 +473,8 @@ void RobotInterfaceFranka::_start_joint_velocity_control_mode()
     VectorXd q_dot_initial = VectorXd::Zero(7);
     VectorXd q_dot = VectorXd::Zero(7);
     desired_joint_velocities_ = VectorXd::Zero(7);
+
+    /*
     trajectory_generator_sptr_ =
         std::make_unique<QuadraticProgramMotionGenerator>(0.8, q_dot_initial, q_dot);
 
@@ -481,6 +483,12 @@ void RobotInterfaceFranka::_start_joint_velocity_control_mode()
     VectorXd K2 = (VectorXd(7)<<n2, n2, n2, n2, n2, n2, n2).finished();
     VectorXd K1 = (VectorXd(7)<<n1, n1, n1, n1, 2*n1, 2*n1, 2*n1).finished();
     trajectory_generator_sptr_->set_diagonal_gains(K1, K2);
+    */
+
+    custom_generator_sptr_ = std::make_unique<CustomMotionGeneration>(0.8, q_dot_initial, q_dot);
+    custom_generator_sptr_->set_proportional_gain(15.0);
+
+
     _update_status_message("Starting joint velocity control mode EXPERIMENTAL",verbose_);
     try {
         double time = 0.0;
@@ -490,7 +498,8 @@ void RobotInterfaceFranka::_start_joint_velocity_control_mode()
                 time += period.toSec();
                 double T = period.toSec();
 
-                auto new_u = trajectory_generator_sptr_->compute_new_configuration_velocities(desired_joint_velocities_, T);
+                //auto new_u = trajectory_generator_sptr_->compute_new_configuration_velocities(desired_joint_velocities_, T);
+                auto new_u = custom_generator_sptr_->compute_new_configuration_velocities(desired_joint_velocities_, T);
 
                 franka::JointVelocities velocities = {{new_u[0], new_u[1],
                                                        new_u[2], new_u[3],

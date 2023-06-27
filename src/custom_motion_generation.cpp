@@ -59,6 +59,34 @@ CustomMotionGeneration::CustomMotionGeneration(const double &speed_factor,
     q_dot_dot_max_ *= speed_factor_;
 }
 
+
+/**
+ * @brief CustomMotionGeneration::CustomMotionGeneration
+ * @param speed_factor
+ * @param q_dot_initial
+ * @param q_dot_goal
+ */
+CustomMotionGeneration::CustomMotionGeneration(const double &speed_factor, const VectorXd &q_dot_initial, const VectorXd &q_dot_goal)
+{
+    n_links_ = _get_dimensions(q_dot_initial, q_dot_goal, q_dot_goal);
+    solver_ = std::make_unique<DQ_QPOASESSolver>();
+    constraints_manager_ = std::make_unique<ConstraintsManager>(n_links_);
+    q_dot_ = q_dot_initial;
+
+
+    H_  = MatrixXd::Identity(n_links_, n_links_);
+    lb_ = VectorXd::Zero(n_links_);
+    ub_ = VectorXd::Zero(n_links_);
+    I_  = MatrixXd::Identity(n_links_, n_links_);
+
+    _check_speed_factor(speed_factor);
+    speed_factor_ = speed_factor;
+
+    q_dot_max_  *= speed_factor_;
+    q_dot_dot_max_ *= speed_factor_;
+
+}
+
 /**
  * @brief CustomMotionGeneration::set_proportional_gain
  * @param gain
@@ -98,6 +126,7 @@ int CustomMotionGeneration::_get_dimensions(const Eigen::VectorXd &q1,
     _check_sizes(q1, q2, q3);
     return q1.size();
 }
+
 
 
 /**
@@ -178,4 +207,32 @@ VectorXd CustomMotionGeneration::compute_new_configuration(const VectorXd &q_goa
 
 
     return q_;
+}
+
+/**
+ * @brief CustomMotionGeneration::compute_new_configuration_velocities
+ * @param q_dot_goal
+ * @param T
+ * @return
+ */
+VectorXd CustomMotionGeneration::compute_new_configuration_velocities(const VectorXd &q_dot_goal, const double &T)
+{
+    f_ = 2*gain_*(q_dot_-q_dot_goal);
+    for (int i=0; i<n_links_;i++)
+    {
+        lb_[i] =   std::max( -q_dot_dot_max_[i], (1/T)*(-q_dot_max_[i] - q_dot_[i]));
+        ub_[i] =   std::min(  q_dot_dot_max_[i], (1/T)*( q_dot_max_[i] - q_dot_[i]));
+    }
+
+
+    constraints_manager_->add_inequality_constraint(-I_, -lb_);
+    constraints_manager_->add_inequality_constraint( I_,  ub_);
+
+
+    std::tie(A_, b_) = constraints_manager_->get_inequality_constraints();
+
+    auto u = solver_->solve_quadratic_program(H_, f_, A_, b_, Aeq_, beq_);
+    q_dot_ = q_dot_ + T*u;
+
+    return q_dot_;
 }

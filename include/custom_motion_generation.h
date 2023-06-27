@@ -83,14 +83,21 @@ private:
     int _get_dimensions(const Eigen::VectorXd &q1, const Eigen::VectorXd &q2, const Eigen::VectorXd &q3) const;
     void _check_speed_factor(const double& speed_factor) const;
 
+
+
 public:
     CustomMotionGeneration(const double &speed_factor,
                            const Eigen::VectorXd &q_initial,
                            const Eigen::VectorXd &q_dot_initial,
                            const Eigen::VectorXd &q_goal);
 
+    CustomMotionGeneration(const double &speed_factor,
+                           const Eigen::VectorXd &q_dot_initial,
+                           const Eigen::VectorXd &q_dot_goal);
+
     void set_proportional_gain(const double& gain);
 
     VectorXd compute_new_configuration(const VectorXd& q_goal, const double& T);
+    VectorXd compute_new_configuration_velocities(const VectorXd& q_dot_goal, const double& T);
 };
 
