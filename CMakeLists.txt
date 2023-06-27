@@ -35,7 +35,18 @@ find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+# To correctly find and link with QT
+set(CMAKE_PREFIX_PATH $ENV{QT_PATH})
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+if(CMAKE_VERSION VERSION_LESS "3.7.0")
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+endif()
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
 add_library(MotionGenerator src/motion_generator.cpp)
@@ -94,6 +105,25 @@ target_link_libraries(sas_robot_driver_franka_node
 
 
 
+add_executable(JuankaEmika
+  qt/configuration_window/main.cpp
+  qt/configuration_window/mainwindow.cpp
+  qt/configuration_window/mainwindow.ui
+  )
+
+target_link_libraries(JuankaEmika  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+    dqrobotics
+
+    ${catkin_LIBRARIES}
+    robot_interface_franka
+    )
+
+
+
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(JuankaEmika)
+endif()
 
 install(TARGETS ${PROJECT_NAME}
 DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
