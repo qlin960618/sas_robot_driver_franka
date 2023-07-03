@@ -1,5 +1,5 @@
 "robot_ip_address": "172.16.0.2"
-"robot_mode": "VelocityControl"
+"robot_mode": "PositionControl"
 "robot_port": 5007
 "robot_speed": 20.0
 "thread_sampling_time_nsec": 4000000

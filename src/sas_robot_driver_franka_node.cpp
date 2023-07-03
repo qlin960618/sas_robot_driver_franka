@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     sas::RobotDriverFrankaConfiguration robot_driver_franka_configuration;
 
     sas::get_ros_param(nh,"/robot_ip_address",robot_driver_franka_configuration.ip_address);
-    sas::get_ros_param(nh,"/robot_mode",      robot_driver_franka_configuration.mode, false);
+    sas::get_ros_param(nh,"/robot_mode",      robot_driver_franka_configuration.mode);
 
     sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
 
