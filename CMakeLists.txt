@@ -72,6 +72,7 @@ add_library(robot_interface_franka src/robot_interface_franka.cpp)
 target_link_libraries(robot_interface_franka Franka::Franka
                       dqrobotics
                       MotionGenerator
+                      ConstraintsManager
                       QuadraticProgramMotionGenerator
                       CustomMotionGeneration)
 
