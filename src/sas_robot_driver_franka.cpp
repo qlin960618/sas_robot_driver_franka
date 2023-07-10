@@ -72,7 +72,7 @@ namespace sas
 
         robot_driver_interface_sptr_ = std::make_shared<RobotInterfaceFranka>(configuration.ip_address,
                                                                         mode, //None, PositionControl, VelocityControl
-                                                                        RobotInterfaceFranka::HAND::ON);
+                                                                        RobotInterfaceFranka::HAND::OFF);
     }
 
     RobotDriverFranka::~RobotDriverFranka()=default;
