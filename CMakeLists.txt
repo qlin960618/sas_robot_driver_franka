@@ -67,7 +67,6 @@ target_link_libraries(CustomMotionGeneration
                         dqrobotics
                         ConstraintsManager)
 
-
 add_library(robot_interface_franka src/robot_interface_franka.cpp)
 target_link_libraries(robot_interface_franka Franka::Franka
                       dqrobotics
@@ -113,6 +112,17 @@ target_link_libraries(sas_robot_driver_franka_node
                       sas_robot_driver_franka 
                       ${catkin_LIBRARIES})
 
+add_library(robot_coppelia_ros_interface src/robot_coppelia_ros_interface.cpp)
+target_link_libraries(robot_coppelia_ros_interface
+                    dqrobotics
+                    dqrobotics-interface-vrep
+                    ${catkin_LIBRARIES})
+
+add_executable(robot_coppelia_ros_interface_node src/robot_coppelia_ros_interface_node.cpp)
+target_link_libraries(robot_coppelia_ros_interface_node
+                      robot_coppelia_ros_interface
+                      sas_robot_driver_franka
+                      ${catkin_LIBRARIES})
 
 
 add_executable(JuankaEmika
