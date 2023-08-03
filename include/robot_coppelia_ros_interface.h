@@ -60,17 +60,35 @@ protected:
 
 
 public:
+
+
+    RobotCoppeliaRosInterface()=delete;
+
+    ~RobotCoppeliaRosInterface();
+
+
+    RobotCoppeliaRosInterface(const RobotCoppeliaRosInterface&) = delete;
+    RobotCoppeliaRosInterface& operator= (const RobotCoppeliaRosInterface&) = delete;
+
     RobotCoppeliaRosInterface(const ros::NodeHandle& nh,
                               const std::string& topic_prefix,
                               const RobotCoppeliaROSConfiguration& configuration,
                               std::atomic_bool* kill_this_node);
 
-    RobotCoppeliaRosInterface()=delete;
-
-    ~RobotCoppeliaRosInterface();
-    //VectorXd  get_joint_positions() const;
+    //VectorXd get_joint_positions() const;
+    //VectorXd get_joint_velocities() const;
     //void set_joint_target_positions(const VectorXd& target_joint_positions);
 
     //void set_joint_target_positions_(const VectorXd& target_joint_positions);
+
+    void connect();
+    void disconnect();
+
+    void initialize();
+    void deinitialize();
     int control_loop();
+
+
+
+
 };

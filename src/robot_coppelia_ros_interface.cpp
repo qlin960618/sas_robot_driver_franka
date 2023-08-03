@@ -25,23 +25,51 @@ RobotCoppeliaRosInterface::RobotCoppeliaRosInterface(const ros::NodeHandle& nh,
     subscriber_target_joint_velocities_ = nh_.subscribe(topic_prefix_ + "/set/target_joint_velocities", 1, &RobotCoppeliaRosInterface::_callback_target_joint_velocities, this);
     publisher_joint_states_ = nh_.advertise<sensor_msgs::JointState>(topic_prefix_+ "/get/joint_states", 1);
 
-    ROS_INFO_STREAM(ros::this_node::getName() << "::Connecting with CoppeliaSim...");
-    vi_ = std::make_shared<DQ_VrepInterface>();
-    vi_->connect(configuration_.ip, configuration_.port, 500, 10);
-    vi_->start_simulation();
-    ROS_INFO_STREAM(ros::this_node::getName() << "::Connection ok!");
+    connect();
+    initialize();
+
 }
 
 RobotCoppeliaRosInterface::~RobotCoppeliaRosInterface()
 {
-    vi_->disconnect();
+    deinitialize();
+    disconnect();
 }
 
-/*
-VectorXd RobotCoppeliaRosInterface::get_joint_positions() const
+
+
+void RobotCoppeliaRosInterface::connect()
 {
-    return joint_positions_;
+    ROS_INFO_STREAM(ros::this_node::getName() << "::Connecting with CoppeliaSim...");
+    vi_ = std::make_shared<DQ_VrepInterface>();
+    vi_->connect(configuration_.ip, configuration_.port, 500, 10);
+
+    ROS_INFO_STREAM(ros::this_node::getName() << "::Connection ok!");
 }
+
+void RobotCoppeliaRosInterface::disconnect()
+{
+    vi_->disconnect();
+    ROS_INFO_STREAM(ros::this_node::getName() << "::Disconnecting simuation.");
+}
+
+void RobotCoppeliaRosInterface::initialize()
+{
+    vi_->start_simulation();
+    ROS_INFO_STREAM(ros::this_node::getName() << "::Starting simuation...");
+}
+
+void RobotCoppeliaRosInterface::deinitialize()
+{
+    vi_->stop_simulation();
+    ROS_INFO_STREAM(ros::this_node::getName() << "::Stopping simuation...");
+}
+
+
+
+
+/*
+
 
 
 /*

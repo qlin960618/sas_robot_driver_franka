@@ -103,9 +103,18 @@ target_link_libraries(sas_robot_driver_franka
                       robot_interface_franka)
 
 
+add_library(sas_robot_driver_coppelia src/sas_robot_driver_coppelia.cpp)
+target_link_libraries(sas_robot_driver_coppelia
+                       dqrobotics
+                       dqrobotics-interface-vrep)
 
+add_dependencies(sas_robot_driver_franka   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(sas_robot_driver_coppelia ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_dependencies(sas_robot_driver_franka ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})                        
+add_executable(sas_robot_driver_coppelia_node src/sas_robot_driver_coppelia_node.cpp)
+target_link_libraries(sas_robot_driver_coppelia_node
+                      sas_robot_driver_coppelia
+                      ${catkin_LIBRARIES})
 
 add_executable(sas_robot_driver_franka_node src/sas_robot_driver_franka_node.cpp)                        
 target_link_libraries(sas_robot_driver_franka_node
@@ -150,6 +159,10 @@ DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 install(TARGETS sas_robot_driver_franka_node
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS sas_robot_driver_coppelia_node
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

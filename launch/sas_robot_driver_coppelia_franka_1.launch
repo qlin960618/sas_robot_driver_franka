@@ -1,0 +1,17 @@
+<launch>
+
+
+
+<node pkg="sas_robot_driver_franka" type="sas_robot_driver_coppelia_node" name="franka_1_sim">
+<rosparam file="$(find sas_robot_driver_franka)/cfg/sas_robot_driver_coppelia_franka_1.yaml" command="load" 
+/>
+
+
+
+</node>
+
+
+
+
+
+</launch>

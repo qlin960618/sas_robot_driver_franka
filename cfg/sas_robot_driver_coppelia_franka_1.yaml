@@ -1,0 +1,10 @@
+"robot_ip_address": "10.198.113.159"
+"robot_mode": "VelocityControl"
+"real_robot_topic_prefix": "franka_1"
+"vrep_port": 20011
+"mirror_mode": true
+"thread_sampling_time_nsec": 4000000
+"q_min": [-2.3093,-1.5133,-2.4937, -2.7478,-2.4800, 0.8521, -2.6895]
+"q_max": [ 2.3093, 1.5133, 2.4937, -0.4461, 2.4800, 4.2094,  2.6895]
+"vrep_robot_joint_names": ["Franka_joint1","Franka_joint2","Franka_joint3","Franka_joint4","Franka_joint5","Franka_joint6","Franka_joint7"]
+
