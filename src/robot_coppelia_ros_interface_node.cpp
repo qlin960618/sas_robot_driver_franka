@@ -84,12 +84,26 @@ int main(int argc, char **argv)
     //4000000
 
     RobotCoppeliaROSConfiguration configuration;
+
+    sas::get_ros_param(nh,"/vrep_ip", configuration.ip);
+    sas::get_ros_param(nh,"/robot_mode",      configuration.robot_mode);
+    sas::get_ros_param(nh,"/thread_sampling_time_nsec",configuration.thread_sampling_time_nsec);
+    sas::get_ros_param(nh,"/vrep_port", configuration.port);
+    sas::get_ros_param(nh,"/vrep_robot_joint_names", configuration.jointnames);
+    sas::get_ros_param(nh,"/mirror_mode", configuration.mirror_mode);
+
+  /*
     configuration.thread_sampling_time_nsec = 4000000;
     configuration.ip = "10.198.113.159";
     configuration.port = 20021;
     std::vector<std::string> jointnames = {"Franka_joint1","Franka_joint2","Franka_joint3",
                                            "Franka_joint4","Franka_joint5","Franka_joint6","Franka_joint7"};
-    RobotCoppeliaRosInterface robot_coppelia_ros_interface(nh, "/franka_1_sim",jointnames, configuration, &kill_this_process);
+    configuration.robot_mode = std::string("VelocityControl");
+    configuration.mirror_mode = true;
+
+    configuration.jointnames = jointnames;
+ */
+    RobotCoppeliaRosInterface robot_coppelia_ros_interface(nh, "/franka_1_sim", configuration, &kill_this_process);
 
     try
     {

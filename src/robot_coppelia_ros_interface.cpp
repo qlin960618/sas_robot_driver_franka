@@ -10,29 +10,26 @@
  */
 RobotCoppeliaRosInterface::RobotCoppeliaRosInterface(const ros::NodeHandle& nh,
                                                      const std::string& topic_prefix,
-                                                     const std::vector<std::string>& jointnames,
                                                      const RobotCoppeliaROSConfiguration& configuration,
                                                      std::atomic_bool* kill_this_node)
     :nh_(nh),
     topic_prefix_(topic_prefix),
-    jointnames_(jointnames),
     kill_this_node_(kill_this_node),
     configuration_(configuration),
+    robot_mode_ (configuration.robot_mode),
+    jointnames_(configuration.jointnames),
+    mirror_mode_(configuration.mirror_mode),
     clock_(configuration.thread_sampling_time_nsec)
 {
-
-    //subscriber_joint_state_ = nh_.subscribe(topic_prefix_+ "/get/joint_states", 1,
-    //                                        &RobotCoppeliaRosInterface::_joint_states_callback, this);
-
-    //publisher_target_joint_positions_ = nh_.advertise<std_msgs::Float64MultiArray>
-    //                                    (topic_prefix_ + "/set/target_joint_positions", 1);
-
-    subscriber_target_joint_positions_ = nh_.subscribe(topic_prefix_ + "/set/target_joint_positions", 1, &RobotCoppeliaRosInterface::_callback_target_joint_positions, this);
+    subscriber_target_joint_positions_  = nh_.subscribe(topic_prefix_ + "/set/target_joint_positions", 1,  &RobotCoppeliaRosInterface::_callback_target_joint_positions, this);
+    subscriber_target_joint_velocities_ = nh_.subscribe(topic_prefix_ + "/set/target_joint_velocities", 1, &RobotCoppeliaRosInterface::_callback_target_joint_velocities, this);
     publisher_joint_states_ = nh_.advertise<sensor_msgs::JointState>(topic_prefix_+ "/get/joint_states", 1);
 
+    ROS_INFO_STREAM(ros::this_node::getName() << "::Connecting with CoppeliaSim...");
     vi_ = std::make_shared<DQ_VrepInterface>();
     vi_->connect(configuration_.ip, configuration_.port, 500, 10);
     vi_->start_simulation();
+    ROS_INFO_STREAM(ros::this_node::getName() << "::Connection ok!");
 }
 
 RobotCoppeliaRosInterface::~RobotCoppeliaRosInterface()
@@ -40,20 +37,14 @@ RobotCoppeliaRosInterface::~RobotCoppeliaRosInterface()
     vi_->disconnect();
 }
 
-/**
- * @brief get_joint_positions
- * @return
- */
+/*
 VectorXd RobotCoppeliaRosInterface::get_joint_positions() const
 {
     return joint_positions_;
 }
 
 
-/**
- * @brief set_joint_target_positions
- * @param target_joint_positions
- */
+/*
 void RobotCoppeliaRosInterface::set_joint_target_positions(const VectorXd &target_joint_positions)
 {
 
@@ -62,12 +53,7 @@ void RobotCoppeliaRosInterface::set_joint_target_positions(const VectorXd &targe
     publisher_target_joint_positions_.publish(ros_msg);
 
 }
-
-void RobotCoppeliaRosInterface::set_joint_target_velocities(const VectorXd &target_joint_velocities)
-{
-
-}
-
+ */
 
 void RobotCoppeliaRosInterface::send_joint_states(const VectorXd &joint_positions, const VectorXd &joint_velocities, const VectorXd &joint_forces)
 {
@@ -85,7 +71,7 @@ int RobotCoppeliaRosInterface::control_loop()
 {
     try{
         clock_.init();
-        ROS_INFO_STREAM(ros::this_node::getName() << "::Waiting to connect with CoppeliaSim...");
+        ROS_INFO_STREAM(ros::this_node::getName() << "::Starting control loop...");
 
 
         while(not _should_shutdown())
@@ -97,16 +83,29 @@ int RobotCoppeliaRosInterface::control_loop()
             joint_positions_ = q;
             send_joint_states(q, VectorXd(), VectorXd());
 
-            if (target_joint_positions_.size()>0)
+            if (robot_mode_  == std::string("VelocityControl"))
             {
-                vi_->set_joint_target_positions(jointnames_, target_joint_positions_);
+                //if (mirror_mode_ == true)
+                //{
+                    if (target_joint_positions_.size()>0)
+                    {
+                        vi_->set_joint_target_velocities(jointnames_, gain_*(target_joint_positions_-q));
+                    }
+                //}
+                //else{
+                    if (target_joint_velocities_.size()>0)
+                    {
+                        vi_->set_joint_target_velocities(jointnames_, target_joint_velocities_);
+                    }
+                //}
             }
-
-            //auto q = get_joint_positions();
-            std::cout<<"q: "<<q.transpose()<<std::endl;
-            std::cout<<"target q: "<<target_joint_positions_.transpose()<<std::endl;
-
-
+            else if (robot_mode_  == std::string("PositionControl"))
+                {
+                    if (target_joint_positions_.size()>0)
+                    {
+                        vi_->set_joint_target_positions(jointnames_, target_joint_positions_);
+                    }
+                }
 
             ros::spinOnce();
         }
@@ -142,4 +141,9 @@ void RobotCoppeliaRosInterface::_joint_states_callback(const sensor_msgs::JointS
 void RobotCoppeliaRosInterface::_callback_target_joint_positions(const std_msgs::Float64MultiArrayConstPtr &msg)
 {
     target_joint_positions_ = sas::std_vector_double_to_vectorxd(msg->data);
+}
+
+void RobotCoppeliaRosInterface::_callback_target_joint_velocities(const std_msgs::Float64MultiArrayConstPtr &msg)
+{
+    target_joint_velocities_ = sas::std_vector_double_to_vectorxd(msg->data);
 }
