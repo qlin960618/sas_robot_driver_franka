@@ -70,7 +70,7 @@ private:
 
     std::string robot_mode_ = std::string("VelocityControl");   // PositionControl
     bool mirror_mode_ = false;
-    double gain_ = 0.5;
+    double gain_ = 3.0;
     std::string real_robot_topic_prefix_;
 
     VectorXd current_joint_positions_;
