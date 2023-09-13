@@ -17,7 +17,7 @@ RobotDriver(break_loops),
     vi_ = std::make_shared<DQ_VrepInterface>();
     desired_joint_velocities_ = VectorXd::Zero(dim_configuration_space_);
     auto nodehandle = ros::NodeHandle();
-    std::cout<<"Rostopic: "<<"/"+real_robot_topic_prefix_<<std::endl;
+    std::cout<<"RobotDriverCoppelia::Rostopic: "<<"/"+real_robot_topic_prefix_<<std::endl;
     franka1_ros_ = std::make_shared<sas::RobotDriverInterface>(nodehandle, "/"+real_robot_topic_prefix_);
 }
 
@@ -53,7 +53,7 @@ void RobotDriverCoppelia::connect()
 
     vi_->connect(configuration_.ip, configuration_.port, 500, 10);
     vi_->set_joint_target_velocities(jointnames_, VectorXd::Zero(dim_configuration_space_));
-    std::cout<<"Connecting..."<<std::endl;
+    std::cout<<"RobotDriverCoppelia::Connecting..."<<std::endl;
 }
 
 void RobotDriverCoppelia::disconnect()
@@ -67,7 +67,7 @@ void RobotDriverCoppelia::disconnect()
     {
         joint_velocity_control_mirror_mode_thread_.join();
     }
-    std::cout<<"Disconnected."<<std::endl;
+    std::cout<<"RobotDriverCoppelia::Disconnected."<<std::endl;
 }
 
 void RobotDriverCoppelia::initialize()
@@ -79,7 +79,7 @@ void RobotDriverCoppelia::initialize()
     }else{
         _start_joint_velocity_control_mirror_thread();
     }
-    std::cout<<"Velocity loop running..."<<std::endl;
+    std::cout<<"RobotDriverCoppelia::Velocity loop running..."<<std::endl;
 }
 
 void RobotDriverCoppelia::deinitialize()
@@ -87,7 +87,7 @@ void RobotDriverCoppelia::deinitialize()
     vi_->set_joint_target_velocities(jointnames_, VectorXd::Zero(dim_configuration_space_));
     vi_->stop_simulation();
     finish_motion();
-    std::cout<<"Deinitialized."<<std::endl;
+    std::cout<<"RobotDriverCoppelia::Deinitialized."<<std::endl;
 }
 
 
@@ -146,11 +146,11 @@ void RobotDriverCoppelia::_start_joint_velocity_control_mode()
     }
     catch(const std::exception& e)
     {
-        std::cout<<"sas_robot_coppelia_driver::_start_joint_velocity_control_mode(). Error or exception caught " << e.what()<<std::endl;
+        std::cout<<"RobotDriverCoppelia::sas_robot_coppelia_driver::_start_joint_velocity_control_mode(). Error or exception caught " << e.what()<<std::endl;
     }
     catch(...)
     {
-        std::cout<<"sas_robot_coppelia_driver::_start_joint_velocity_control_mode(). Error or exception caught " <<std::endl;
+        std::cout<<"RobotDriverCoppelia::sas_robot_coppelia_driver::_start_joint_velocity_control_mode(). Error or exception caught " <<std::endl;
     }
 
 
@@ -189,7 +189,7 @@ void RobotDriverCoppelia::_start_joint_velocity_control_mirror_mode()
 
     try{
         finish_motion_ = false;
-        std::cout<<"Waiting for real robot topics..."<<std::endl;
+        std::cout<<"RobotDriverCoppelia::Waiting for real robot topics..."<<std::endl;
         VectorXd q;
         while (ros::ok()) {
             if (franka1_ros_->is_enabled())
@@ -199,7 +199,7 @@ void RobotDriverCoppelia::_start_joint_velocity_control_mirror_mode()
             }
             ros::spinOnce();
         }
-        std::cout<<"Done!"<<std::endl;
+        std::cout<<"RobotDriverCoppelia::Done!"<<std::endl;
 
         VectorXd q_vrep = vi_->get_joint_positions(jointnames_);
         VectorXd q_dot_vrep =  vi_->get_joint_velocities(jointnames_);
@@ -237,11 +237,11 @@ void RobotDriverCoppelia::_start_joint_velocity_control_mirror_mode()
     }
     catch(const std::exception& e)
     {
-        std::cout<<"sas_robot_coppelia_driver::_start_joint_velocity_control_mirror_mode(). Error or exception caught " << e.what()<<std::endl;
+        std::cout<<"RobotDriverCoppelia::sas_robot_coppelia_driver::_start_joint_velocity_control_mirror_mode(). Error or exception caught " << e.what()<<std::endl;
     }
     catch(...)
     {
-        std::cout<<"sas_robot_coppelia_driver::_start_joint_velocity_control_mirror_mode(). Error or exception caught " <<std::endl;
+        std::cout<<"RobotDriverCoppelia::sas_robot_coppelia_driver::_start_joint_velocity_control_mirror_mode(). Error or exception caught " <<std::endl;
     }
 
 
