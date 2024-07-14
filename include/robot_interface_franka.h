@@ -117,6 +117,9 @@ private:
 
 
     //-------To handle the threads-----------------
+    std::atomic<bool> exit_on_err_={false};
+
+
     void _start_joint_position_control_mode();
     std::thread joint_position_control_mode_thread_;
     void _start_joint_position_control_thread();
@@ -168,6 +171,8 @@ public:
     VectorXd get_home_robot_configuration();
 
     std::string get_status_message();
+
+    bool get_err_state() const {return exit_on_err_.load();}
 
     std::string get_robot_mode();
 

@@ -34,12 +34,15 @@
 #include "sas_robot_driver_franka.h"
 #include "sas_clock/sas_clock.h"
 #include <dqrobotics/utils/DQ_Math.h>
+#include <ros/this_node.h>
+#include <rosconsole/macros_generated.h>
 
 namespace sas
 {
     RobotDriverFranka::RobotDriverFranka(const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
     RobotDriver(break_loops),
-    configuration_(configuration)
+    configuration_(configuration),
+    break_loops_(break_loops)
    {
         joint_positions_.resize(7);
         joint_velocities_.resize(7);
@@ -125,6 +128,10 @@ namespace sas
      */
     VectorXd  RobotDriverFranka::get_joint_positions()
     {
+        if(robot_driver_interface_sptr_->get_err_state()) {
+            ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
+            break_loops_->store(true);
+        }
         return robot_driver_interface_sptr_->get_joint_positions();
     }
 
@@ -137,6 +144,10 @@ namespace sas
     void RobotDriverFranka::set_target_joint_positions(const VectorXd& desired_joint_positions_rad)
     {
         robot_driver_interface_sptr_->set_target_joint_positions(desired_joint_positions_rad);
+        if(robot_driver_interface_sptr_->get_err_state()) {
+            ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
+            break_loops_->store(true);
+        }
     }
 
     /**
@@ -158,6 +169,10 @@ namespace sas
     {
         desired_joint_velocities_ = desired_joint_velocities;
         robot_driver_interface_sptr_->set_target_joint_velocities(desired_joint_velocities);
+        if(robot_driver_interface_sptr_->get_err_state()) {
+            ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
+            break_loops_->store(true);
+        }
     }
 
     /**

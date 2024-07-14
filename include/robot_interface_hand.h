@@ -52,7 +52,7 @@ using namespace Eigen;
 class RobotInterfaceHand
 {
 protected:
-    double speed_gripper_ = 0.02;
+    double speed_gripper_ = 0.05;//0.02
     std::string ip_ = "172.16.0.2";
     std::shared_ptr<franka::Gripper> gripper_sptr_;
     void _check_if_hand_is_connected();

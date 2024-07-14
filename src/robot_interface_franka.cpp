@@ -32,6 +32,9 @@
 
 #include "robot_interface_franka.h"
 
+#include <ros/this_node.h>
+#include <rosconsole/macros_generated.h>
+
 
 /**
  * @brief robot_driver_franka::robot_driver_franka
@@ -376,6 +379,9 @@ void RobotInterfaceFranka::_start_echo_robot_state_mode(){
     }
     catch (franka::Exception const& e) {
         std::cout << e.what() << std::endl;
+        exit_on_err_.store(true);
+        status_message_=e.what();
+        // ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::echo_robot_state_mode::Error on:"+e.what());
     }
 }
 
@@ -453,6 +459,9 @@ void RobotInterfaceFranka::_start_joint_position_control_mode()
         }
         catch (franka::Exception const& e) {
             std::cout << e.what() << std::endl;
+            exit_on_err_.store(true);
+            status_message_=e.what();
+        // ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::joint_position_control_mode::Error on:"+e.what());
         }
 
 
@@ -524,6 +533,9 @@ void RobotInterfaceFranka::_start_joint_velocity_control_mode()
     }
     catch (franka::Exception const& e) {
         std::cout << e.what() << std::endl;
+        exit_on_err_.store(true);
+        status_message_=e.what();
+        // ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::joint_velocity_control_mode::Error on:"+e.what());
     }
 }
 
@@ -534,6 +546,7 @@ void RobotInterfaceFranka::_start_joint_velocity_control_mode()
  */
 void RobotInterfaceFranka::_setDefaultRobotBehavior()
 {
+
     robot_sptr_->setCollisionBehavior(
         {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0}}, {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0}},
         {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}},

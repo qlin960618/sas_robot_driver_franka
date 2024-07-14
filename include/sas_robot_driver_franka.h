@@ -42,6 +42,7 @@
 
 #include <sas_robot_driver/sas_robot_driver.h>
 #include "robot_interface_franka.h"
+#include <ros/common.h>
 
 using namespace DQ_robotics;
 using namespace Eigen;
@@ -74,6 +75,7 @@ private:
     //std::vector<double> end_effector_pose_euler_buffer_;
     //std::vector<double> end_effector_pose_homogenous_transformation_buffer_;
 
+    std::atomic_bool* break_loops_;
 
 
 public:
