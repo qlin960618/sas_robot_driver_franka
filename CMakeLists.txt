@@ -102,6 +102,11 @@ target_link_libraries(sas_robot_driver_franka
                       dqrobotics
                       robot_interface_franka)
 
+add_library(sas_robot_driver_franka_hand src/sas_robot_driver_franka_hand.cpp)
+target_link_libraries(sas_robot_driver_franka_hand
+        dqrobotics
+        Franka::Franka)
+
 
 add_library(sas_robot_driver_coppelia src/sas_robot_driver_coppelia.cpp)
 target_link_libraries(sas_robot_driver_coppelia
@@ -121,6 +126,11 @@ target_link_libraries(sas_robot_driver_franka_node
                       sas_robot_driver_franka 
                       ${catkin_LIBRARIES})
 
+
+add_executable(sas_robot_driver_franka_hand_node src/sas_robot_driver_franka_hand_node.cpp)
+target_link_libraries(sas_robot_driver_franka_hand_node
+        sas_robot_driver_franka_hand
+        ${catkin_LIBRARIES})
 
 
 
