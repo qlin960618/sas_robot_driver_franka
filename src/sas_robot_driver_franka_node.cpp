@@ -53,6 +53,28 @@ void sig_int_handler(int)
     kill_this_process = true;
 }
 
+template<typename T, std::size_t N>
+std::array<T, N> apply_scale_to_std_array(const std::array<T, N>& array, const T& scale)
+{
+    std::array<T, N> scaled_array;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        scaled_array[i] = array[i] * scale;
+    }
+    return scaled_array;
+}
+template<typename T, std::size_t N>
+std::array<T, N> std_vec_to_std_array(const std::vector<T>& vector)
+{
+    if(N != vector.size()){throw std::runtime_error("Size mismatch between vector and array.");}
+    std::array<T, N> array;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        array[i] = vector[i];
+    }
+    return array;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -70,9 +92,38 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nh;
     sas::RobotDriverFrankaConfiguration robot_driver_franka_configuration;
+    RobotInterfaceFranka::FrankaInterfaceConfiguration franka_interface_configuration;
 
     sas::get_ros_param(nh,"/robot_ip_address",robot_driver_franka_configuration.ip_address);
     sas::get_ros_param(nh,"/robot_mode",      robot_driver_franka_configuration.mode);
+    double upper_scale_factor = 1.0;
+    std::vector<std::string> all_params;
+    if(nh.hasParam(ros::this_node::getName()+"/force_upper_limits_scaling_factor"))
+    {
+        sas::get_ros_param(nh,"/force_upper_limits_scaling_factor",upper_scale_factor);
+        ROS_WARN_STREAM(ros::this_node::getName()+"::Set force upper limits scaling factor: " << upper_scale_factor);
+    }
+    if(nh.hasParam(ros::this_node::getName()+"/upper_torque_threshold")) {
+        ROS_INFO_STREAM(ros::this_node::getName()+"::Upper torque threshold override and set.");
+        std::vector<double> upper_torque_threshold_std_vec;
+        sas::get_ros_param(nh,"/upper_torque_threshold",upper_torque_threshold_std_vec);
+        franka_interface_configuration.upper_torque_threshold = std_vec_to_std_array<double,7>(upper_torque_threshold_std_vec);
+    }else {
+        ROS_INFO_STREAM(ros::this_node::getName()+"::Upper torque threshold not set. Using default with value scalling.");
+        franka_interface_configuration.upper_torque_threshold = apply_scale_to_std_array(franka_interface_configuration.upper_torque_threshold, upper_scale_factor);
+    }
+    if(nh.hasParam(ros::this_node::getName()+"/upper_force_threshold")) {
+        ROS_INFO_STREAM(ros::this_node::getName()+"::Upper force threshold override and set.");
+        std::vector<double> upper_torque_threshold_std_vec;
+        sas::get_ros_param(nh,"/upper_force_threshold",upper_torque_threshold_std_vec);
+        franka_interface_configuration.upper_force_threshold = std_vec_to_std_array<double,6>(upper_torque_threshold_std_vec);
+    }else {
+        ROS_INFO_STREAM(ros::this_node::getName()+"::Upper force threshold not set. Using default with value scalling.");
+        franka_interface_configuration.upper_force_threshold = apply_scale_to_std_array(franka_interface_configuration.upper_force_threshold, upper_scale_factor);
+    }
+
+
+    robot_driver_franka_configuration.interface_configuration = franka_interface_configuration;
 
     sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
 
@@ -80,9 +131,11 @@ int main(int argc, char **argv)
     sas::get_ros_param(nh,"/q_min",robot_driver_ros_configuration.q_min);
     sas::get_ros_param(nh,"/q_max",robot_driver_ros_configuration.q_max);
 
+    // initialize the robot dynamic provider
     robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
     sas::RobotDynamicProvider robot_dynamic_provider(nh, robot_driver_ros_configuration.robot_driver_provider_prefix);
-    
+
+
     try
         {
             ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating Franka robot.");

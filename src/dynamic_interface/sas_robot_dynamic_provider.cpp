@@ -41,14 +41,15 @@ RobotDynamicProvider::RobotDynamicProvider(ros::NodeHandle &publisher_nodehandle
     node_prefix_(node_prefix)
 {
     ROS_INFO_STREAM(ros::this_node::getName() + "::Initializing RobotDynamicProvider with prefix " + node_prefix);
-    publisher_cartesian_contact_ = publisher_nodehandle.advertise<geometry_msgs::WrenchStamped>(node_prefix + "/get/cartesian_contact", 1);
-    publisher_cartesian_pose_ = publisher_nodehandle.advertise<geometry_msgs::PoseStamped>(node_prefix + "/get/cartesian_pose", 1);
+    publisher_cartesian_stiffness_ = publisher_nodehandle.advertise<geometry_msgs::WrenchStamped>(node_prefix + "/get/cartesian_stiffness", 1);
+    publisher_stiffness_pose_ = publisher_nodehandle.advertise<geometry_msgs::PoseStamped>(node_prefix + "/get/stiffness_pose", 1);
 
 }
 
 
-void RobotDynamicProvider::publish_cartesian_contact(const Vector3d& force, const Vector3d& torque)
+void RobotDynamicProvider::publish_stiffness(const DQ& base_to_stiffness, const Vector3d& force, const Vector3d& torque) const
 {
+    publisher_stiffness_pose_.publish(dq_to_geometry_msgs_pose_stamped(base_to_stiffness));
     geometry_msgs::WrenchStamped msg;
     msg.header.stamp = ros::Time::now();
     msg.wrench.force.x = force(0);
@@ -57,9 +58,6 @@ void RobotDynamicProvider::publish_cartesian_contact(const Vector3d& force, cons
     msg.wrench.torque.x = torque(0);
     msg.wrench.torque.y = torque(1);
     msg.wrench.torque.z = torque(2);
-    publisher_cartesian_contact_.publish(msg);
+    publisher_cartesian_stiffness_.publish(msg);
 }
-void RobotDynamicProvider::publish_cartesian_pose(const DQ& pose)
-{
-    publisher_cartesian_pose_.publish(dq_to_geometry_msgs_pose_stamped(pose));
-}
+

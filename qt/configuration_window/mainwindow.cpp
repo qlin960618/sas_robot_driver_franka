@@ -216,9 +216,13 @@ void MainWindow::on_pushButton_connect_clicked()
     if (!robot_driver_franka_sptr_)
     {
         //qDebug()<<"Create Pointer ";
-        robot_driver_franka_sptr_ = std::make_shared<RobotInterfaceFranka>(robotIp_std,
-                                                                          MODE,
-                                                                          RobotInterfaceFranka::HAND::ON);
+        RobotInterfaceFranka::FrankaInterfaceConfiguration default_config;
+        robot_driver_franka_sptr_ = std::make_shared<RobotInterfaceFranka>(
+            default_config,
+            robotIp_std,
+            MODE,
+            RobotInterfaceFranka::HAND::ON
+            );
 
     }
 

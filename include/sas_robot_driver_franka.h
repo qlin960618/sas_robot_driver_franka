@@ -48,9 +48,10 @@
 using namespace DQ_robotics;
 using namespace Eigen;
 
+struct RobotInterfaceFranka::FrankaInterfaceConfiguration;  // Forward declaration
+
 namespace sas
 {
-
 
 struct RobotDriverFrankaConfiguration
 {
@@ -58,6 +59,7 @@ struct RobotDriverFrankaConfiguration
     std::string mode;
     int port;
     double speed;
+    RobotInterfaceFranka::FrankaInterfaceConfiguration interface_configuration;
 };
 
 
@@ -81,7 +83,7 @@ private:
     std::atomic_bool* break_loops_;
 
     // hotfix function to update cartesian contact and pose information
-    void _update_cartesian_contact_and_pose() const;
+    void _update_stiffness_contact_and_pose() const;
 
 
 public:
