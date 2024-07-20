@@ -91,16 +91,21 @@ target_link_libraries(robot_interface_hand Franka::Franka
 include_directories(
     include
     src/
+    src/dynamic_interface
     ${catkin_INCLUDE_DIRS}
     constraints_manager/include
     )
 
 
+add_library(sas_robot_dynamic_provider src/dynamic_interface/sas_robot_dynamic_provider.cpp)
+target_link_libraries(sas_robot_dynamic_provider dqrobotics)
+
 
 add_library(sas_robot_driver_franka src/sas_robot_driver_franka.cpp)
 target_link_libraries(sas_robot_driver_franka
-                      dqrobotics
-                      robot_interface_franka)
+                    sas_robot_dynamic_provider
+                    dqrobotics
+                    robot_interface_franka)
 
 add_library(sas_robot_driver_franka_hand src/sas_robot_driver_franka_hand.cpp)
 target_link_libraries(sas_robot_driver_franka_hand
@@ -123,7 +128,7 @@ target_link_libraries(sas_robot_driver_coppelia_node
 
 add_executable(sas_robot_driver_franka_node src/sas_robot_driver_franka_node.cpp)                        
 target_link_libraries(sas_robot_driver_franka_node
-                      sas_robot_driver_franka 
+                      sas_robot_driver_franka
                       ${catkin_LIBRARIES})
 
 

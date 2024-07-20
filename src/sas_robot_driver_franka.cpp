@@ -39,9 +39,10 @@
 
 namespace sas
 {
-    RobotDriverFranka::RobotDriverFranka(const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
+    RobotDriverFranka::RobotDriverFranka(RobotDynamicProvider* robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
     RobotDriver(break_loops),
     configuration_(configuration),
+    robot_dynamic_provider_(robot_dynamic_provider),
     break_loops_(break_loops)
    {
         joint_positions_.resize(7);
@@ -79,6 +80,17 @@ namespace sas
     }
 
     RobotDriverFranka::~RobotDriverFranka()=default;
+
+
+    void RobotDriverFranka::_update_cartesian_contact_and_pose() const
+    {
+        Vector3d force, torque;
+        std::tie(force, torque) = robot_driver_interface_sptr_->get_cartesian_force_torque();
+        const auto pose = robot_driver_interface_sptr_->get_cartesian_pose();
+        robot_dynamic_provider_->publish_cartesian_contact(force, torque);
+        robot_dynamic_provider_->publish_cartesian_pose(pose);
+    }
+
 
 
     /**
@@ -132,6 +144,7 @@ namespace sas
             ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
             break_loops_->store(true);
         }
+        _update_cartesian_contact_and_pose();
         return robot_driver_interface_sptr_->get_joint_positions();
     }
 

@@ -78,6 +78,13 @@ private:
     VectorXd current_joint_forces_;
     std::array<double, 7> current_joint_forces_array_;
 
+    Vector3d current_cartesian_force_;
+    Vector3d current_cartesian_torque_;
+    std::array<double, 6> current_cartesian_force_torque_array_;
+
+    VectorXd current_cartesian_pose_;
+    std::array<double, 16> current_cartesian_pose_array_;
+
     franka::RobotMode robot_mode_;
 
     double time_ = 0;
@@ -186,6 +193,9 @@ public:
     VectorXd get_joint_positions();
     VectorXd get_joint_velocities();
     VectorXd get_joint_forces();
+
+    std::tuple<Vector3d, Vector3d> get_cartesian_force_torque();
+    DQ get_cartesian_pose();
 
     double get_time();
 

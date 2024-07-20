@@ -351,6 +351,13 @@ void RobotInterfaceFranka::_update_robot_state(const franka::RobotState &robot_s
     current_joint_forces_array_ = robot_state.tau_J;
     current_joint_forces_ =  Eigen::Map<VectorXd>(current_joint_forces_array_.data(), 7);
 
+    current_cartesian_force_torque_array_ = robot_state.cartesian_contact;
+    current_cartesian_force_ = Eigen::Map<Vector3d>(current_cartesian_force_torque_array_.data(), 3);
+    current_cartesian_torque_ = Eigen::Map<Vector3d>(current_cartesian_force_torque_array_.data()+3, 3);
+
+    current_cartesian_pose_array_ = robot_state.O_T_EE;
+    current_cartesian_pose_ = Eigen::Map<VectorXd>(current_cartesian_pose_array_.data(), 16);
+
     robot_mode_ = robot_state.robot_mode;
     time_ = time;
 }
@@ -671,6 +678,29 @@ VectorXd RobotInterfaceFranka::get_joint_forces()
 {
     _check_if_robot_is_connected();
     return current_joint_forces_;
+}
+
+
+std::tuple<Vector3d, Vector3d> RobotInterfaceFranka::get_cartesian_force_torque()
+{
+    _check_if_robot_is_connected();
+    return std::make_tuple(current_cartesian_force_, current_cartesian_torque_);
+
+}
+
+
+DQ RobotInterfaceFranka::get_cartesian_pose()
+{
+    _check_if_robot_is_connected();
+    // VectorXd current_cartesian_pose_;
+    const auto t = DQ(0, current_cartesian_pose_[3], current_cartesian_pose_[7], current_cartesian_pose_[11]);
+    Matrix3d rotationMatrix;
+    rotationMatrix << current_cartesian_pose_(0), current_cartesian_pose_(1), current_cartesian_pose_(2),
+                      current_cartesian_pose_(4), current_cartesian_pose_(5), current_cartesian_pose_(6),
+                      current_cartesian_pose_(8), current_cartesian_pose_(9), current_cartesian_pose_(10);
+    Quaterniond quaternion(rotationMatrix);
+    const auto r = DQ(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z());
+    return r + 0.5 * E_ * t * r;
 }
 
 

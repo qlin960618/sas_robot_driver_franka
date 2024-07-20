@@ -40,6 +40,7 @@
 #include <sas_conversions/eigen3_std_conversions.h>
 #include <sas_robot_driver/sas_robot_driver_ros.h>
 #include "sas_robot_driver_franka.h"
+#include "sas_robot_dynamic_provider.h"
 
 
 /*********************************************
@@ -80,12 +81,16 @@ int main(int argc, char **argv)
     sas::get_ros_param(nh,"/q_max",robot_driver_ros_configuration.q_max);
 
     robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
+    sas::RobotDynamicProvider robot_dynamic_provider(nh, robot_driver_ros_configuration.robot_driver_provider_prefix);
     
     try
         {
             ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating Franka robot.");
-            sas::RobotDriverFranka robot_driver_franka(robot_driver_franka_configuration, 
-                                                        &kill_this_process);
+            sas::RobotDriverFranka robot_driver_franka(
+                &robot_dynamic_provider,
+                robot_driver_franka_configuration,
+                &kill_this_process
+            );
             //robot_driver_franka.set_joint_limits({qmin, qmax});
             ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating RobotDriverROS.");
             sas::RobotDriverROS robot_driver_ros(nh,
@@ -96,6 +101,7 @@ int main(int argc, char **argv)
         }
     catch (const std::exception& e)
     {
+        kill_this_process = true;
         ROS_ERROR_STREAM(ros::this_node::getName() + "::Exception::" + e.what());
     }     
  
