@@ -1,4 +1,4 @@
-#include "quadratic_program_motion_generator.h"
+#include "generator/quadratic_program_motion_generator.h"
 
 
 QuadraticProgramMotionGenerator::QuadraticProgramMotionGenerator(const double &speed_factor,

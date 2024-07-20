@@ -31,7 +31,7 @@
 */
 
 
-#include "sas_robot_driver_franka.h"
+#include "../../include/sas_robot_driver_franka.h"
 #include "sas_clock/sas_clock.h"
 #include <dqrobotics/utils/DQ_Math.h>
 #include <ros/this_node.h>
@@ -39,9 +39,10 @@
 
 namespace sas
 {
-    RobotDriverFranka::RobotDriverFranka(const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
+    RobotDriverFranka::RobotDriverFranka(RobotDynamicProvider* robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
     RobotDriver(break_loops),
     configuration_(configuration),
+    robot_dynamic_provider_(robot_dynamic_provider),
     break_loops_(break_loops)
    {
         joint_positions_.resize(7);
@@ -73,12 +74,25 @@ namespace sas
         }
 
 
-        robot_driver_interface_sptr_ = std::make_shared<RobotInterfaceFranka>(configuration.ip_address,
-                                                                        mode, //None, PositionControl, VelocityControl
-                                                                        RobotInterfaceFranka::HAND::OFF);
+        robot_driver_interface_sptr_ = std::make_shared<RobotInterfaceFranka>(
+            configuration.interface_configuration,
+            configuration.ip_address,
+            mode, //None, PositionControl, VelocityControl
+            RobotInterfaceFranka::HAND::OFF
+        );
     }
 
     RobotDriverFranka::~RobotDriverFranka()=default;
+
+
+    void RobotDriverFranka::_update_stiffness_contact_and_pose() const
+    {
+        Vector3d force, torque;
+        std::tie(force, torque) = robot_driver_interface_sptr_->get_stiffness_force_torque();
+        const auto pose = robot_driver_interface_sptr_->get_stiffness_pose();
+        robot_dynamic_provider_->publish_stiffness(pose, force, torque);
+    }
+
 
 
     /**
@@ -132,6 +146,7 @@ namespace sas
             ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
             break_loops_->store(true);
         }
+        _update_stiffness_contact_and_pose();
         return robot_driver_interface_sptr_->get_joint_positions();
     }
 

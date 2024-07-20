@@ -39,7 +39,7 @@
 #include <sas_common/sas_common.h>
 #include <sas_conversions/eigen3_std_conversions.h>
 #include <sas_robot_driver/sas_robot_driver_ros.h>
-#include "sas_robot_driver_coppelia.h"
+#include "coppelia/sas_robot_driver_coppelia.h"
 
 /*********************************************
  * SIGNAL HANDLER

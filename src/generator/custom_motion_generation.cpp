@@ -28,9 +28,7 @@
 #
 # ################################################################
 */
-
-
-#include "custom_motion_generation.h"
+#include "generator/custom_motion_generation.h"
 
 /**
  * @brief CustomMotionGeneration::CustomMotionGeneration

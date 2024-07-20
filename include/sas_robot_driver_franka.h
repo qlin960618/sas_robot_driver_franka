@@ -43,13 +43,15 @@
 #include <sas_robot_driver/sas_robot_driver.h>
 #include "robot_interface_franka.h"
 #include <ros/common.h>
+#include "sas_robot_dynamic_provider.h"
 
 using namespace DQ_robotics;
 using namespace Eigen;
 
+struct RobotInterfaceFranka::FrankaInterfaceConfiguration;  // Forward declaration
+
 namespace sas
 {
-
 
 struct RobotDriverFrankaConfiguration
 {
@@ -57,6 +59,7 @@ struct RobotDriverFrankaConfiguration
     std::string mode;
     int port;
     double speed;
+    RobotInterfaceFranka::FrankaInterfaceConfiguration interface_configuration;
 };
 
 
@@ -66,6 +69,8 @@ private:
     RobotDriverFrankaConfiguration configuration_;
 
     std::shared_ptr<RobotInterfaceFranka> robot_driver_interface_sptr_ = nullptr;
+
+    RobotDynamicProvider* robot_dynamic_provider_;
 
     //Joint positions
     VectorXd joint_positions_;
@@ -77,6 +82,9 @@ private:
 
     std::atomic_bool* break_loops_;
 
+    // hotfix function to update cartesian contact and pose information
+    void _update_stiffness_contact_and_pose() const;
+
 
 public:
     //const static int SLAVE_MODE_JOINT_CONTROL;
@@ -86,7 +94,11 @@ public:
     RobotDriverFranka()=delete;
     ~RobotDriverFranka();
 
-    RobotDriverFranka(const RobotDriverFrankaConfiguration& configuration, std::atomic_bool* break_loops);
+    RobotDriverFranka(
+        RobotDynamicProvider* robot_dynamic_provider,
+        const RobotDriverFrankaConfiguration& configuration,
+        std::atomic_bool* break_loops
+        );
 
 
     VectorXd get_joint_positions() override;

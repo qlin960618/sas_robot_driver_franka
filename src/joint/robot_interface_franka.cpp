@@ -38,13 +38,17 @@
 
 /**
  * @brief robot_driver_franka::robot_driver_franka
+ * @param configuration The configuration of the robot for setting control beheavior
  * @param ROBOT_IP The IP address of the FCI
  * @param mode The operation mode {None, PositionControl}.
  * @param hand The hand option {ONFinished, OFF}.
  */
-RobotInterfaceFranka::RobotInterfaceFranka(const std::string &ROBOT_IP,
-                                         const MODE& mode,
-                                         const HAND& hand):ip_(ROBOT_IP),mode_(mode)
+RobotInterfaceFranka::RobotInterfaceFranka(
+    const FrankaInterfaceConfiguration &configuration,
+    const std::string &ROBOT_IP,
+    const MODE& mode,
+    const HAND& hand
+    ):ip_(ROBOT_IP),franka_configuration_(configuration),mode_(mode)
 {
     _set_driver_mode(mode);
     if (hand == RobotInterfaceFranka::HAND::ON)
@@ -308,6 +312,16 @@ void RobotInterfaceFranka::initialize()
 
     initialize_flag_ = true;
 
+    // initialize and set the robot to default behavior (collision behavior, impedance, etc)
+    setDefaultBehavior(*robot_sptr_);
+    robot_sptr_->setCollisionBehavior(
+        franka_configuration_.lower_torque_threshold,
+        franka_configuration_.upper_torque_threshold,
+        franka_configuration_.lower_force_threshold,
+        franka_configuration_.upper_force_threshold
+        );
+    robot_sptr_->setJointImpedance(franka_configuration_.joint_impedance);
+    robot_sptr_->setCartesianImpedance(franka_configuration_.cartesian_impedance);
 
     switch (mode_)
     {
@@ -350,6 +364,19 @@ void RobotInterfaceFranka::_update_robot_state(const franka::RobotState &robot_s
 
     current_joint_forces_array_ = robot_state.tau_J;
     current_joint_forces_ =  Eigen::Map<VectorXd>(current_joint_forces_array_.data(), 7);
+
+    current_stiffness_force_torque_array_ = robot_state.O_F_ext_hat_K;
+    current_stiffness_force_[0] = current_stiffness_force_torque_array_[0];
+    current_stiffness_force_[1] = current_stiffness_force_torque_array_[1];
+    current_stiffness_force_[2] = current_stiffness_force_torque_array_[2];
+    current_stiffness_torque_[0] = current_stiffness_force_torque_array_[3];
+    current_stiffness_torque_[1] = current_stiffness_force_torque_array_[4];
+    current_stiffness_torque_[2] = current_stiffness_force_torque_array_[5];
+
+    current_effector_pose_array_ = robot_state.O_T_EE;
+    current_stiffness_pose_array_ = robot_state.EE_T_K;
+    current_effeector_pose_ = Eigen::Map<VectorXd>(current_effector_pose_array_.data(), 16);
+    current_stiffness_pose_ = Eigen::Map<VectorXd>(current_stiffness_pose_array_.data(), 16);
 
     robot_mode_ = robot_state.robot_mode;
     time_ = time;
@@ -673,6 +700,25 @@ VectorXd RobotInterfaceFranka::get_joint_forces()
     return current_joint_forces_;
 }
 
+
+std::tuple<Vector3d, Vector3d> RobotInterfaceFranka::get_stiffness_force_torque()
+{
+    _check_if_robot_is_connected();
+    return std::make_tuple(current_stiffness_force_, current_stiffness_torque_);
+
+}
+
+
+/**
+ * @brief robot_driver_franka::get_stiffness_pose
+ * @return
+ */
+DQ RobotInterfaceFranka::get_stiffness_pose() {
+    _check_if_robot_is_connected();
+    const auto base_2_ee = homgenious_tf_to_DQ(current_effeector_pose_);
+    const auto ee_2_k = homgenious_tf_to_DQ(current_stiffness_pose_);
+    return base_2_ee * ee_2_k;
+}
 
 /**
  * @brief robot_driver_franka::get_time

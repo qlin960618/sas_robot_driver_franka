@@ -40,19 +40,46 @@
 #include <franka/robot.h>
 #include <franka/gripper.h>
 #include <franka/exception.h>
-#include "motion_generator.h"
+#include "generator/motion_generator.h"
 #include <thread>
-#include "quadratic_program_motion_generator.h"
+#include "generator/quadratic_program_motion_generator.h"
 #include <dqrobotics/robots/FrankaEmikaPandaRobot.h>
 #include <atomic>
-#include "custom_motion_generation.h"
+#include "generator/custom_motion_generation.h"
 
 using namespace DQ_robotics;
 using namespace Eigen;
 
+/**
+ * @brief get homgenious_tf_to_DQ
+ * @param pose_vector (column major)
+ * @return pose
+ */
+inline DQ homgenious_tf_to_DQ(const VectorXd& pose_vector) {
+    // VectorXd column major
+    const auto t = DQ(0,  pose_vector(12), pose_vector(13), pose_vector(14));
+    Eigen::Matrix<double, 3, 3, Eigen::ColMajor> rot_mat;
+    rot_mat << pose_vector(0), pose_vector(4), pose_vector(8),
+               pose_vector(1), pose_vector(5), pose_vector(9),
+               pose_vector(2), pose_vector(6), pose_vector(10);
+    Quaternion<double> quaternion(rot_mat);
+    const auto r = normalize(DQ(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z()));
+    return r + 0.5 * E_ * t * r;
+}
+
 class RobotInterfaceFranka
 {
-public: enum class MODE{
+public:
+    struct FrankaInterfaceConfiguration {
+        std::array<double, 7> lower_torque_threshold={10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+        std::array<double, 7> upper_torque_threshold={10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+        std::array<double, 6> lower_force_threshold={10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+        std::array<double, 6> upper_force_threshold={10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+        std::array<double, 7> joint_impedance={3000, 3000, 3000, 2500, 2500, 2000, 2000};  // K_theta (Nm/rad)
+        std::array<double, 6> cartesian_impedance={3000, 3000, 3000, 300, 300, 300}; // K_x (N/m)
+    };
+
+    enum class MODE{
         None=0,
         PositionControl,
         VelocityControl,
@@ -64,6 +91,7 @@ public: enum class MODE{
 private:
     using Vector7d = Eigen::Matrix<double, 7, 1, Eigen::ColMajor>;
     std::string ip_ = "172.16.0.2";
+    FrankaInterfaceConfiguration franka_configuration_;
     double speed_factor_joint_position_controller_ = 0.2;
     double speed_gripper_ = 0.02;
     VectorXd desired_joint_positions_;
@@ -77,6 +105,15 @@ private:
 
     VectorXd current_joint_forces_;
     std::array<double, 7> current_joint_forces_array_;
+
+    Vector3d current_stiffness_force_;
+    Vector3d current_stiffness_torque_;
+    std::array<double, 6> current_stiffness_force_torque_array_;
+
+    VectorXd current_stiffness_pose_;
+    VectorXd current_effeector_pose_;
+    std::array<double, 16> current_stiffness_pose_array_;
+    std::array<double, 16> current_effector_pose_array_;
 
     franka::RobotMode robot_mode_;
 
@@ -151,7 +188,11 @@ public:
     RobotInterfaceFranka() = delete;
     RobotInterfaceFranka(const RobotInterfaceFranka&) = delete;
     RobotInterfaceFranka& operator= (const RobotInterfaceFranka&) = delete;
-    RobotInterfaceFranka(const std::string &ROBOT_IP, const MODE& mode, const HAND& hand = ON);
+    RobotInterfaceFranka(
+        const FrankaInterfaceConfiguration &configuration,
+        const std::string &ROBOT_IP,
+        const MODE& mode,
+        const HAND& hand = ON);
 
 
 
@@ -186,6 +227,9 @@ public:
     VectorXd get_joint_positions();
     VectorXd get_joint_velocities();
     VectorXd get_joint_forces();
+
+    std::tuple<Vector3d, Vector3d> get_stiffness_force_torque();
+    DQ get_stiffness_pose();
 
     double get_time();
 

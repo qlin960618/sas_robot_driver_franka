@@ -49,25 +49,25 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
-add_library(MotionGenerator src/motion_generator.cpp)
+add_library(MotionGenerator src/generator/motion_generator.cpp)
 target_link_libraries(MotionGenerator Franka::Franka)
 
 
 add_library(ConstraintsManager constraints_manager/src/constraints_manager.cpp)
 
-add_library(QuadraticProgramMotionGenerator src/quadratic_program_motion_generator.cpp)
+add_library(QuadraticProgramMotionGenerator src/generator/quadratic_program_motion_generator.cpp)
 target_link_libraries(QuadraticProgramMotionGenerator
                        qpOASES
                        dqrobotics
                        ConstraintsManager)
 
-add_library(CustomMotionGeneration src/custom_motion_generation.cpp)
+add_library(CustomMotionGeneration src/generator/custom_motion_generation.cpp)
 target_link_libraries(CustomMotionGeneration
                         qpOASES
                         dqrobotics
                         ConstraintsManager)
 
-add_library(robot_interface_franka src/robot_interface_franka.cpp)
+add_library(robot_interface_franka src/joint/robot_interface_franka.cpp)
 target_link_libraries(robot_interface_franka Franka::Franka
                       dqrobotics
                       MotionGenerator
@@ -75,7 +75,7 @@ target_link_libraries(robot_interface_franka Franka::Franka
                       QuadraticProgramMotionGenerator
                       CustomMotionGeneration)
 
-add_library(robot_interface_hand src/robot_interface_hand.cpp)
+add_library(robot_interface_hand src/hand/robot_interface_hand.cpp)
 target_link_libraries(robot_interface_hand Franka::Franka
                       dqrobotics)
 
@@ -90,25 +90,33 @@ target_link_libraries(robot_interface_hand Franka::Franka
 
 include_directories(
     include
+    include/generator
     src/
+    src/dynamic_interface
+    src/hand
+    src/joint
     ${catkin_INCLUDE_DIRS}
     constraints_manager/include
     )
 
 
+add_library(sas_robot_dynamic_provider src/dynamic_interface/sas_robot_dynamic_provider.cpp)
+target_link_libraries(sas_robot_dynamic_provider dqrobotics)
 
-add_library(sas_robot_driver_franka src/sas_robot_driver_franka.cpp)
+
+add_library(sas_robot_driver_franka src/joint/sas_robot_driver_franka.cpp)
 target_link_libraries(sas_robot_driver_franka
-                      dqrobotics
-                      robot_interface_franka)
+                    sas_robot_dynamic_provider
+                    dqrobotics
+                    robot_interface_franka)
 
-add_library(sas_robot_driver_franka_hand src/sas_robot_driver_franka_hand.cpp)
+add_library(sas_robot_driver_franka_hand src/hand/sas_robot_driver_franka_hand.cpp)
 target_link_libraries(sas_robot_driver_franka_hand
         dqrobotics
         Franka::Franka)
 
 
-add_library(sas_robot_driver_coppelia src/sas_robot_driver_coppelia.cpp)
+add_library(sas_robot_driver_coppelia src/coppelia/sas_robot_driver_coppelia.cpp)
 target_link_libraries(sas_robot_driver_coppelia
                        dqrobotics
                        dqrobotics-interface-vrep)
@@ -123,7 +131,7 @@ target_link_libraries(sas_robot_driver_coppelia_node
 
 add_executable(sas_robot_driver_franka_node src/sas_robot_driver_franka_node.cpp)                        
 target_link_libraries(sas_robot_driver_franka_node
-                      sas_robot_driver_franka 
+                      sas_robot_driver_franka
                       ${catkin_LIBRARIES})
 
 
@@ -142,7 +150,6 @@ add_executable(JuankaEmika
 
 target_link_libraries(JuankaEmika  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
     dqrobotics
-
     ${catkin_LIBRARIES}
     robot_interface_franka
     )
@@ -163,6 +170,10 @@ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(TARGETS sas_robot_driver_coppelia_node
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS sas_robot_driver_franka_hand_node
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
