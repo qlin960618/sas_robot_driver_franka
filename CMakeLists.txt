@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  tf2_ros
+  tf2
   sas_common
   sas_clock
   sas_robot_driver
@@ -27,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver
+  CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver tf2_ros tf2
 )
 
 find_package(Franka REQUIRED)
@@ -101,7 +103,9 @@ include_directories(
 
 
 add_library(sas_robot_dynamic_provider src/dynamic_interface/sas_robot_dynamic_provider.cpp)
-target_link_libraries(sas_robot_dynamic_provider dqrobotics)
+target_link_libraries(sas_robot_dynamic_provider
+        ${catkin_LIBRARIES}
+        dqrobotics)
 
 
 add_library(sas_robot_driver_franka src/joint/sas_robot_driver_franka.cpp)

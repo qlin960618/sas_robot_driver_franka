@@ -44,6 +44,7 @@
 #include "robot_interface_franka.h"
 #include <ros/common.h>
 #include "sas_robot_dynamic_provider.h"
+#include <thread>
 
 using namespace DQ_robotics;
 using namespace Eigen;
@@ -70,7 +71,7 @@ private:
 
     std::shared_ptr<RobotInterfaceFranka> robot_driver_interface_sptr_ = nullptr;
 
-    RobotDynamicProvider* robot_dynamic_provider_;
+    qros::RobotDynamicProvider* robot_dynamic_provider_;
 
     //Joint positions
     VectorXd joint_positions_;
@@ -86,6 +87,8 @@ private:
     void _update_stiffness_contact_and_pose() const;
 
 
+
+
 public:
     //const static int SLAVE_MODE_JOINT_CONTROL;
     //const static int SLAVE_MODE_END_EFFECTOR_CONTROL;
@@ -95,7 +98,7 @@ public:
     ~RobotDriverFranka();
 
     RobotDriverFranka(
-        RobotDynamicProvider* robot_dynamic_provider,
+        qros::RobotDynamicProvider* robot_dynamic_provider,
         const RobotDriverFrankaConfiguration& configuration,
         std::atomic_bool* break_loops
         );

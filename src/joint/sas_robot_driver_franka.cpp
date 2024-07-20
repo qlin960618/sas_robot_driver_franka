@@ -39,7 +39,7 @@
 
 namespace sas
 {
-    RobotDriverFranka::RobotDriverFranka(RobotDynamicProvider* robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
+    RobotDriverFranka::RobotDriverFranka(qros::RobotDynamicProvider* robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
     RobotDriver(break_loops),
     configuration_(configuration),
     robot_dynamic_provider_(robot_dynamic_provider),

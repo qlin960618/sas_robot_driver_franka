@@ -33,25 +33,37 @@
 #include <sas_common/sas_common.h>
 #include <sas_conversions/sas_conversions.h>
 #include <geometry_msgs/WrenchStamped.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Transform.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <geometry_msgs/Pose.h>
+#include <std_msgs/Header.h>
 #include <dqrobotics/DQ.h>
 
-namespace sas {
+namespace qros {
 
 using namespace DQ_robotics;
 
 class RobotDynamicProvider {
 private:
+    unsigned int seq_ = 0;
+
     std::string node_prefix_;
+    std::string child_frame_id_;
+    std::string parent_frame_id_;
 
     ros::Publisher publisher_cartesian_stiffness_;
-    ros::Publisher publisher_stiffness_pose_;
+    tf2_ros::TransformBroadcaster tf_broadcaster_;
+
+
+    static geometry_msgs::Transform _dq_to_geometry_msgs_transform(const DQ& pose) ;
 
 public:
     RobotDynamicProvider(ros::NodeHandle& nodehandle, const std::string& node_prefix=ros::this_node::getName());
     RobotDynamicProvider(ros::NodeHandle& publisher_nodehandle, ros::NodeHandle& subscriber_nodehandle, const std::string& node_prefix=ros::this_node::getName());
 
-    void publish_stiffness(const DQ& base_to_stiffness, const Vector3d& force, const Vector3d& torque) const;
+    void publish_stiffness(const DQ& base_to_stiffness, const Vector3d& force, const Vector3d& torque);
 
 };
 

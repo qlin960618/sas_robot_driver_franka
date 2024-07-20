@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 
     // initialize the robot dynamic provider
     robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
-    sas::RobotDynamicProvider robot_dynamic_provider(nh, robot_driver_ros_configuration.robot_driver_provider_prefix);
+    qros::RobotDynamicProvider robot_dynamic_provider(nh, robot_driver_ros_configuration.robot_driver_provider_prefix);
 
 
     try
