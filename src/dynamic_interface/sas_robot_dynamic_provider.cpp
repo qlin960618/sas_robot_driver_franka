@@ -44,7 +44,6 @@ RobotDynamicProvider::RobotDynamicProvider(ros::NodeHandle &publisher_nodehandle
 {
     ROS_INFO_STREAM(ros::this_node::getName() + "::Initializing RobotDynamicProvider with prefix " + node_prefix);
     publisher_cartesian_stiffness_ = publisher_nodehandle.advertise<geometry_msgs::WrenchStamped>(node_prefix + "/get/cartesian_stiffness", 1);
-    // publisher_stiffness_pose_ = publisher_nodehandle.advertise<geometry_msgs::TransformStamped>(node_prefix + "/get/stiffness_pose", 1);
 
 }
 
@@ -71,13 +70,6 @@ void RobotDynamicProvider::publish_stiffness(const DQ& base_to_stiffness, const 
     std_msgs::Header header;
     header.stamp = ros::Time::now();
     header.seq = seq_++;
-    header.frame_id = parent_frame_id_;
-    geometry_msgs::TransformStamped tf_msg;
-    tf_msg.transform = _dq_to_geometry_msgs_transform(base_to_stiffness);
-    tf_msg.header = header;
-    tf_msg.child_frame_id = child_frame_id_;
-    tf_broadcaster_.sendTransform(tf_msg);
-    // publisher_stiffness_pose_.publish(pose_msg);
     geometry_msgs::WrenchStamped msg;
     msg.header = header;
     msg.header.frame_id = child_frame_id_;
@@ -88,5 +80,14 @@ void RobotDynamicProvider::publish_stiffness(const DQ& base_to_stiffness, const 
     msg.wrench.torque.y = torque(1);
     msg.wrench.torque.z = torque(2);
     publisher_cartesian_stiffness_.publish(msg);
+    if(seq_ % REDUCE_TF_PUBLISH_RATE == 0)
+    {
+        geometry_msgs::TransformStamped tf_msg;
+        tf_msg.transform = _dq_to_geometry_msgs_transform(base_to_stiffness);
+        tf_msg.header = header;
+        tf_msg.header.frame_id = parent_frame_id_;
+        tf_msg.child_frame_id = child_frame_id_;
+        tf_broadcaster_.sendTransform(tf_msg);
+    }
 }
 

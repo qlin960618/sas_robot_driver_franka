@@ -41,6 +41,8 @@
 #include <std_msgs/Header.h>
 #include <dqrobotics/DQ.h>
 
+#define REDUCE_TF_PUBLISH_RATE 10
+
 namespace qros {
 
 using namespace DQ_robotics;
