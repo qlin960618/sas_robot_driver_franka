@@ -365,7 +365,7 @@ void RobotInterfaceFranka::_update_robot_state(const franka::RobotState &robot_s
     current_joint_forces_array_ = robot_state.tau_J;
     current_joint_forces_ =  Eigen::Map<VectorXd>(current_joint_forces_array_.data(), 7);
 
-    current_stiffness_force_torque_array_ = robot_state.O_F_ext_hat_K;
+    current_stiffness_force_torque_array_ = robot_state.K_F_ext_hat_K;
     current_stiffness_force_[0] = current_stiffness_force_torque_array_[0];
     current_stiffness_force_[1] = current_stiffness_force_torque_array_[1];
     current_stiffness_force_[2] = current_stiffness_force_torque_array_[2];
@@ -718,6 +718,7 @@ DQ RobotInterfaceFranka::get_stiffness_pose() {
     const auto base_2_ee = homgenious_tf_to_DQ(current_effeector_pose_);
     const auto ee_2_k = homgenious_tf_to_DQ(current_stiffness_pose_);
     return base_2_ee * ee_2_k;
+    // return base_2_k;
 }
 
 /**
