@@ -40,7 +40,7 @@
 #include <sas_conversions/eigen3_std_conversions.h>
 #include <sas_robot_driver/sas_robot_driver_ros.h>
 #include "sas_robot_driver_franka.h"
-#include "sas_robot_dynamic_provider.h"
+#include <robot_dynamic/qros_robot_dynamics_provider.h>
 
 
 /*********************************************

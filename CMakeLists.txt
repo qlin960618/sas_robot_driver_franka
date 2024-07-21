@@ -25,11 +25,15 @@ find_package(catkin REQUIRED COMPONENTS
   sas_clock
   sas_robot_driver
   sas_patient_side_manager
+        pybind11_catkin
+
 )
 
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver tf2_ros tf2
+        pybind11_catkin
+
 )
 
 find_package(Franka REQUIRED)
@@ -94,7 +98,7 @@ include_directories(
     include
     include/generator
     src/
-    src/dynamic_interface
+        src/robot_dynamics
     src/hand
     src/joint
     ${catkin_INCLUDE_DIRS}
@@ -102,15 +106,20 @@ include_directories(
     )
 
 
-add_library(sas_robot_dynamic_provider src/dynamic_interface/sas_robot_dynamic_provider.cpp)
-target_link_libraries(sas_robot_dynamic_provider
+add_library(qros_robot_dynamics_provider src/robot_dynamics/qros_robot_dynamics_provider.cpp)
+target_link_libraries(qros_robot_dynamics_provider
+        ${catkin_LIBRARIES}
+        dqrobotics)
+
+add_library(qros_robot_dynamics_interface src/robot_dynamics/qros_robot_dynamics_interface.cpp)
+target_link_libraries(qros_robot_dynamics_interface
         ${catkin_LIBRARIES}
         dqrobotics)
 
 
 add_library(sas_robot_driver_franka src/joint/sas_robot_driver_franka.cpp)
 target_link_libraries(sas_robot_driver_franka
-                    sas_robot_dynamic_provider
+                    qros_robot_dynamics_provider
                     dqrobotics
                     robot_interface_franka)
 
@@ -160,6 +169,20 @@ target_link_libraries(JuankaEmika  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
 
 
 
+#####################################################################################
+# python binding
+include_directories(
+        include/robot_dynamic
+)
+pybind_add_module(_qros_robot_dynamic SHARED
+        src/robot_dynamics/qros_robot_dynamic_py.cpp src/robot_dynamics/qros_robot_dynamics_interface.cpp src/robot_dynamics/qros_robot_dynamics_provider.cpp
+)
+target_compile_definitions(_qros_robot_dynamic PRIVATE BUILD_PYBIND)
+# https://github.com/pybind/pybind11/issues/387
+target_link_libraries(_qros_robot_dynamic PRIVATE ${catkin_LIBRARIES} -ldqrobotics)
+
+
+
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(JuankaEmika)
@@ -187,3 +210,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
 )                        
+
+
+install(TARGETS _qros_robot_dynamic
+        LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}
+)
+
+catkin_python_setup()

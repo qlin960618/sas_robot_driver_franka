@@ -43,8 +43,7 @@
 #include <sas_robot_driver/sas_robot_driver.h>
 #include "robot_interface_franka.h"
 #include <ros/common.h>
-#include "sas_robot_dynamic_provider.h"
-#include <thread>
+#include <robot_dynamic/qros_robot_dynamics_provider.h>
 
 using namespace DQ_robotics;
 using namespace Eigen;

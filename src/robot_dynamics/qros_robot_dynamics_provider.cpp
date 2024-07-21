@@ -27,7 +27,7 @@
 #
 # ################################################################
 */
-#include "sas_robot_dynamic_provider.h"
+#include <robot_dynamic/qros_robot_dynamics_provider.h>
 
 using namespace qros;
 
@@ -89,5 +89,11 @@ void RobotDynamicProvider::publish_stiffness(const DQ& base_to_stiffness, const 
         tf_msg.child_frame_id = child_frame_id_;
         tf_broadcaster_.sendTransform(tf_msg);
     }
+}
+
+
+bool RobotDynamicProvider::is_enabled() const
+{
+    return true; //Always enabled
 }
 

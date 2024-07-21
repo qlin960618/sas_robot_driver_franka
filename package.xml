@@ -59,6 +59,7 @@
   <build_depend>sas_robot_driver</build_depend>
   <build_depend>sas_common</build_depend>
   <build_depend>sas_patient_side_manager</build_depend>
+  <build_depend>pybind11_catkin</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
@@ -69,6 +70,7 @@
   <build_export_depend>sas_robot_driver</build_export_depend>
   <build_export_depend>sas_common</build_export_depend>
   <build_export_depend>sas_patient_side_manager</build_export_depend>
+  <build_export_depend>pybind11_catkin</build_export_depend>
 
 
   <exec_depend>roscpp</exec_depend>

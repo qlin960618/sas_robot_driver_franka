@@ -19,7 +19,7 @@
 #
 # ################################################################
 #
-#   Author: Juan Jose Quiroz Omana, email: juanjqogm@gmail.com
+#   Author: Quenitin Lin
 #
 # ################################################################
 #
@@ -62,10 +62,19 @@ private:
     static geometry_msgs::Transform _dq_to_geometry_msgs_transform(const DQ& pose) ;
 
 public:
-    RobotDynamicProvider(ros::NodeHandle& nodehandle, const std::string& node_prefix=ros::this_node::getName());
+    RobotDynamicProvider() = delete;
+    RobotDynamicProvider(const RobotDynamicProvider&) = delete;
+#ifdef BUILD_PYBIND
+    explicit RobotDynamicProvider(const std::string& node_prefix):RobotDynamicProvider(sas::common::get_static_node_handle(),node_prefix){}
+#endif
+    explicit RobotDynamicProvider(ros::NodeHandle& nodehandle, const std::string& node_prefix=ros::this_node::getName());
     RobotDynamicProvider(ros::NodeHandle& publisher_nodehandle, ros::NodeHandle& subscriber_nodehandle, const std::string& node_prefix=ros::this_node::getName());
 
     void publish_stiffness(const DQ& base_to_stiffness, const Vector3d& force, const Vector3d& torque);
+
+
+    bool is_enabled() const;
+    std::string get_topic_prefix() const {return node_prefix_;}
 
 };
 
