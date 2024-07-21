@@ -36,12 +36,14 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros//static_transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <geometry_msgs/Pose.h>
 #include <std_msgs/Header.h>
 #include <dqrobotics/DQ.h>
 
 #define REDUCE_TF_PUBLISH_RATE 10
+#define WORLD_FRAME_ID "world"
 
 namespace qros {
 
@@ -57,9 +59,13 @@ private:
 
     ros::Publisher publisher_cartesian_stiffness_;
     tf2_ros::TransformBroadcaster tf_broadcaster_;
+    tf2_ros::StaticTransformBroadcaster static_base_tf_broadcaster_;
 
+    DQ world_to_base_tf_;
 
-    static geometry_msgs::Transform _dq_to_geometry_msgs_transform(const DQ& pose) ;
+    static geometry_msgs::Transform _dq_to_geometry_msgs_transform(const DQ& pose);
+
+    void _publish_base_static_tf();
 
 public:
     RobotDynamicProvider() = delete;
@@ -72,6 +78,7 @@ public:
 
     void publish_stiffness(const DQ& base_to_stiffness, const Vector3d& force, const Vector3d& torque);
 
+    void set_world_to_base_tf(const DQ& world_to_base_tf);
 
     bool is_enabled() const;
     std::string get_topic_prefix() const {return node_prefix_;}

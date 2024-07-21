@@ -40,8 +40,13 @@ RobotDynamicProvider::RobotDynamicProvider(ros::NodeHandle &nodehandle, const st
 RobotDynamicProvider::RobotDynamicProvider(ros::NodeHandle &publisher_nodehandle, ros::NodeHandle &subscriber_nodehandle, const std::string &node_prefix):
     node_prefix_(node_prefix),
     child_frame_id_(node_prefix + "_stiffness_frame"),
-    parent_frame_id_(node_prefix + "_base")
+    parent_frame_id_(node_prefix + "_base"),
+    world_to_base_tf_(0)
 {
+    // Strip potential leading slash
+    if(child_frame_id_.front() == '/'){child_frame_id_ = child_frame_id_.substr(1);}
+    if(parent_frame_id_.front() == '/'){parent_frame_id_ = parent_frame_id_.substr(1);}
+
     ROS_INFO_STREAM(ros::this_node::getName() + "::Initializing RobotDynamicProvider with prefix " + node_prefix);
     publisher_cartesian_stiffness_ = publisher_nodehandle.advertise<geometry_msgs::WrenchStamped>(node_prefix + "/get/cartesian_stiffness", 1);
 
@@ -63,6 +68,28 @@ geometry_msgs::Transform RobotDynamicProvider::_dq_to_geometry_msgs_transform(co
     return tf_msg;
 }
 
+void RobotDynamicProvider::set_world_to_base_tf(const DQ& world_to_base_tf)
+{
+    if(world_to_base_tf_==0)
+    {
+        world_to_base_tf_ = world_to_base_tf;
+        _publish_base_static_tf();
+    }else
+    {
+        throw std::runtime_error("The world to base transform has already been set");
+    }
+}
+
+void RobotDynamicProvider::_publish_base_static_tf()
+{
+    geometry_msgs::TransformStamped base_tf;
+    base_tf.transform = _dq_to_geometry_msgs_transform(world_to_base_tf_);
+    base_tf.header.stamp = ros::Time::now();
+    base_tf.header.frame_id = WORLD_FRAME_ID;
+    base_tf.child_frame_id = parent_frame_id_;
+    static_base_tf_broadcaster_.sendTransform(base_tf);
+
+}
 
 
 void RobotDynamicProvider::publish_stiffness(const DQ& base_to_stiffness, const Vector3d& force, const Vector3d& torque)

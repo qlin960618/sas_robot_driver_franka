@@ -16,24 +16,21 @@ add_custom_target(cfg ALL WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} SOURCES ${EXTR
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  tf2_ros
-  tf2
-  sas_common
-  sas_clock
-  sas_robot_driver
-  sas_patient_side_manager
+        roscpp
+        rospy
+        std_msgs
+        tf2_ros
+        tf2
+        sas_common
+        sas_clock
+        sas_robot_driver
+        sas_patient_side_manager
         pybind11_catkin
-
 )
 
 catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver tf2_ros tf2
-        pybind11_catkin
-
+        INCLUDE_DIRS include
+        CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver tf2_ros tf2 pybind11_catkin
 )
 
 find_package(Franka REQUIRED)
@@ -46,9 +43,9 @@ set(CMAKE_PREFIX_PATH $ENV{QT_PATH})
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-if(CMAKE_VERSION VERSION_LESS "3.7.0")
+if (CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
+endif ()
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
@@ -63,27 +60,27 @@ add_library(ConstraintsManager constraints_manager/src/constraints_manager.cpp)
 
 add_library(QuadraticProgramMotionGenerator src/generator/quadratic_program_motion_generator.cpp)
 target_link_libraries(QuadraticProgramMotionGenerator
-                       qpOASES
-                       dqrobotics
-                       ConstraintsManager)
+        qpOASES
+        dqrobotics
+        ConstraintsManager)
 
 add_library(CustomMotionGeneration src/generator/custom_motion_generation.cpp)
 target_link_libraries(CustomMotionGeneration
-                        qpOASES
-                        dqrobotics
-                        ConstraintsManager)
+        qpOASES
+        dqrobotics
+        ConstraintsManager)
 
 add_library(robot_interface_franka src/joint/robot_interface_franka.cpp)
 target_link_libraries(robot_interface_franka Franka::Franka
-                      dqrobotics
-                      MotionGenerator
-                      ConstraintsManager
-                      QuadraticProgramMotionGenerator
-                      CustomMotionGeneration)
+        dqrobotics
+        MotionGenerator
+        ConstraintsManager
+        QuadraticProgramMotionGenerator
+        CustomMotionGeneration)
 
 add_library(robot_interface_hand src/hand/robot_interface_hand.cpp)
 target_link_libraries(robot_interface_hand Franka::Franka
-                      dqrobotics)
+        dqrobotics)
 
 
 ############
@@ -95,15 +92,15 @@ target_link_libraries(robot_interface_hand Franka::Franka
 
 
 include_directories(
-    include
-    include/generator
-    src/
+        include
+        include/generator
+        src/
         src/robot_dynamics
-    src/hand
-    src/joint
-    ${catkin_INCLUDE_DIRS}
-    constraints_manager/include
-    )
+        src/hand
+        src/joint
+        ${catkin_INCLUDE_DIRS}
+        constraints_manager/include
+)
 
 
 add_library(qros_robot_dynamics_provider src/robot_dynamics/qros_robot_dynamics_provider.cpp)
@@ -119,9 +116,10 @@ target_link_libraries(qros_robot_dynamics_interface
 
 add_library(sas_robot_driver_franka src/joint/sas_robot_driver_franka.cpp)
 target_link_libraries(sas_robot_driver_franka
-                    qros_robot_dynamics_provider
-                    dqrobotics
-                    robot_interface_franka)
+        qros_robot_dynamics_provider
+        dqrobotics
+        dqrobotics-interface-json11
+        robot_interface_franka)
 
 add_library(sas_robot_driver_franka_hand src/hand/sas_robot_driver_franka_hand.cpp)
 target_link_libraries(sas_robot_driver_franka_hand
@@ -131,21 +129,21 @@ target_link_libraries(sas_robot_driver_franka_hand
 
 add_library(sas_robot_driver_coppelia src/coppelia/sas_robot_driver_coppelia.cpp)
 target_link_libraries(sas_robot_driver_coppelia
-                       dqrobotics
-                       dqrobotics-interface-vrep)
+        dqrobotics
+        dqrobotics-interface-vrep)
 
-add_dependencies(sas_robot_driver_franka   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(sas_robot_driver_franka ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(sas_robot_driver_coppelia ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(sas_robot_driver_coppelia_node src/sas_robot_driver_coppelia_node.cpp)
 target_link_libraries(sas_robot_driver_coppelia_node
-                      sas_robot_driver_coppelia
-                      ${catkin_LIBRARIES})
+        sas_robot_driver_coppelia
+        ${catkin_LIBRARIES})
 
-add_executable(sas_robot_driver_franka_node src/sas_robot_driver_franka_node.cpp)                        
+add_executable(sas_robot_driver_franka_node src/sas_robot_driver_franka_node.cpp)
 target_link_libraries(sas_robot_driver_franka_node
-                      sas_robot_driver_franka
-                      ${catkin_LIBRARIES})
+        sas_robot_driver_franka
+        ${catkin_LIBRARIES})
 
 
 add_executable(sas_robot_driver_franka_hand_node src/sas_robot_driver_franka_hand_node.cpp)
@@ -154,19 +152,17 @@ target_link_libraries(sas_robot_driver_franka_hand_node
         ${catkin_LIBRARIES})
 
 
-
 add_executable(JuankaEmika
-  qt/configuration_window/main.cpp
-  qt/configuration_window/mainwindow.cpp
-  qt/configuration_window/mainwindow.ui
-  )
+        qt/configuration_window/main.cpp
+        qt/configuration_window/mainwindow.cpp
+        qt/configuration_window/mainwindow.ui
+)
 
-target_link_libraries(JuankaEmika  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-    dqrobotics
-    ${catkin_LIBRARIES}
-    robot_interface_franka
-    )
-
+target_link_libraries(JuankaEmika PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+        dqrobotics
+        ${catkin_LIBRARIES}
+        robot_interface_franka
+)
 
 
 #####################################################################################
@@ -182,34 +178,32 @@ target_compile_definitions(_qros_robot_dynamic PRIVATE BUILD_PYBIND)
 target_link_libraries(_qros_robot_dynamic PRIVATE ${catkin_LIBRARIES} -ldqrobotics)
 
 
-
-
-if(QT_VERSION_MAJOR EQUAL 6)
+if (QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(JuankaEmika)
-endif()
+endif ()
 
 install(TARGETS ${PROJECT_NAME}
-DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 install(TARGETS sas_robot_driver_franka_node
-DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(TARGETS sas_robot_driver_coppelia_node
-DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(TARGETS sas_robot_driver_franka_hand_node
-DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-)                        
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        FILES_MATCHING PATTERN "*.h"
+        #   PATTERN ".svn" EXCLUDE
+)
 
 
 install(TARGETS _qros_robot_dynamic

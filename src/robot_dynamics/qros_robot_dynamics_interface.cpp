@@ -47,8 +47,10 @@ RobotDynamicInterface::RobotDynamicInterface(ros::NodeHandle &publisher_nodehand
     last_stiffness_torque_(Vector3d::Zero()),
     last_stiffness_frame_pose_(0)
 {
+    // Strip potential leading slash
+    if(child_frame_id_.front() == '/'){child_frame_id_ = child_frame_id_.substr(1);}
+    if(parent_frame_id_.front() == '/'){parent_frame_id_ = parent_frame_id_.substr(1);}
     ROS_INFO_STREAM(ros::this_node::getName() + "::Initializing RobotDynamicInterface with prefix " + node_prefix);
-
     subscriber_cartesian_stiffness_ = subscriber_nodehandle.subscribe(node_prefix_ + "/get/cartesian_stiffness", 1, &RobotDynamicInterface::_callback_cartesian_stiffness, this);
 
 }
@@ -64,7 +66,7 @@ void RobotDynamicInterface::_callback_cartesian_stiffness(const geometry_msgs::W
     last_stiffness_torque_(2) = msg->wrench.torque.z;
 
     try {
-        const auto transform_stamped = tf_buffer_.lookupTransform(parent_frame_id_, child_frame_id_, ros::Time(0));
+        const auto transform_stamped = tf_buffer_.lookupTransform( parent_frame_id_, child_frame_id_, ros::Time(0));
         last_stiffness_frame_pose_ = _geometry_msgs_transform_to_dq(transform_stamped.transform);
     } catch (tf2::TransformException &ex) {
         ROS_WARN_STREAM(ros::this_node::getName() + "::" + ex.what());

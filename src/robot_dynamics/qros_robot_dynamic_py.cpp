@@ -53,6 +53,7 @@ PYBIND11_MODULE(_qros_robot_dynamic, m)
     py::class_<RDP>(m, "RobotDynamicsProvider")
         .def(py::init<const std::string&>())
         .def("publish_stiffness",&RDP::publish_stiffness)
+        .def("set_world_to_base_tf", &RDP::set_world_to_base_tf)
         .def("is_enabled",&RDP::is_enabled,"Returns true if the RobotDynamicProvider is enabled.")
         .def("get_topic_prefix",&RDP::get_topic_prefix);
 

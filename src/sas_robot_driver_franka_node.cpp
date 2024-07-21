@@ -35,7 +35,7 @@
 
 #include <exception>
 #include <dqrobotics/utils/DQ_Math.h>
-//#include <dqrobotics/interfaces/json11/DQ_JsonReader.h>
+#include <dqrobotics/interfaces/json11/DQ_JsonReader.h>
 #include <sas_common/sas_common.h>
 #include <sas_conversions/eigen3_std_conversions.h>
 #include <sas_robot_driver/sas_robot_driver_ros.h>
@@ -121,7 +121,14 @@ int main(int argc, char **argv)
         ROS_INFO_STREAM(ros::this_node::getName()+"::Upper force threshold not set. Using default with value scalling.");
         franka_interface_configuration.upper_force_threshold = apply_scale_to_std_array(franka_interface_configuration.upper_force_threshold, upper_scale_factor);
     }
-
+    if(nh.hasParam(ros::this_node::getName()+"/robot_parameter_file_path"))
+    {
+        std::string robot_parameter_file_path;
+        sas::get_ros_param(nh,"/robot_parameter_file_path",robot_parameter_file_path);
+        ROS_INFO_STREAM(ros::this_node::getName()+"::Loading robot parameters from file: " + robot_parameter_file_path);
+        const auto robot = DQ_JsonReader::get_from_json<DQ_SerialManipulatorDH>(robot_parameter_file_path);
+        robot_driver_franka_configuration.robot_reference_frame = robot.get_reference_frame();
+    }else{ROS_INFO_STREAM(ros::this_node::getName()+"::Robot parameter file path not set. Robot Model Unknow.");}
 
     robot_driver_franka_configuration.interface_configuration = franka_interface_configuration;
 
@@ -134,7 +141,10 @@ int main(int argc, char **argv)
     // initialize the robot dynamic provider
     robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
     qros::RobotDynamicProvider robot_dynamic_provider(nh, robot_driver_ros_configuration.robot_driver_provider_prefix);
-
+    if(robot_driver_franka_configuration.robot_reference_frame!=0)
+    {
+        robot_dynamic_provider.set_world_to_base_tf(robot_driver_franka_configuration.robot_reference_frame);
+    }
 
     try
         {
