@@ -36,7 +36,7 @@
 #include <sas_common/sas_common.h>
 #include <sas_conversions/eigen3_std_conversions.h>
 #include <sas_robot_driver/sas_robot_driver_ros.h>
-#include "sas_robot_driver_franka_hand.h"
+#include "hand/qros_effector_driver_franka_hand.h"
 
 
 /*********************************************
@@ -49,6 +49,22 @@ void sig_int_handler(int)
     kill_this_process = true;
 }
 
+
+
+template<typename T>
+void get_optional_parameter(const std::string &node_prefix, ros::NodeHandle &nh, const std::string &param_name, T &param)
+{
+    if(nh.hasParam(node_prefix + param_name))
+    {
+        sas::get_ros_param(nh,param_name,param);
+    }else
+    {
+        ROS_INFO_STREAM(ros::this_node::getName() + "::Parameter " + param_name + " not found. Using default value. " + std::to_string(param));
+    }
+
+}
+
+
 int main(int argc, char **argv)
 {
     if(signal(SIGINT, sig_int_handler) == SIG_ERR)
@@ -60,32 +76,24 @@ int main(int argc, char **argv)
     ROS_WARN("---------------------------Quentin Lin-------------------------------");
     ROS_WARN("=====================================================================");
     ROS_INFO_STREAM(ros::this_node::getName()+"::Loading parameters from parameter server.");
+    const std::string& effector_driver_provider_prefix = ros::this_node::getName();
 
 
     ros::NodeHandle nh;
-    sas::RobotDriverFrankaHandConfiguration robot_driver_franka_hand_configuration;
+    qros::EffectorDriverFrankaHandConfiguration robot_driver_franka_hand_configuration;
 
     sas::get_ros_param(nh,"/robot_ip_address",robot_driver_franka_hand_configuration.robot_ip);
 
+    get_optional_parameter(effector_driver_provider_prefix,nh,"/thread_sampling_time_nsec",robot_driver_franka_hand_configuration.thread_sampeling_time_ns);
+    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_force",robot_driver_franka_hand_configuration.default_force);
+    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_speed",robot_driver_franka_hand_configuration.default_speed);
+    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_epsilon_inner",robot_driver_franka_hand_configuration.default_epsilon_inner);
+    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_epsilon_outer",robot_driver_franka_hand_configuration.default_epsilon_outer);
 
-    sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
-
-    sas::get_ros_param(nh,"/thread_sampling_time_nsec",robot_driver_ros_configuration.thread_sampling_time_nsec);
-    bool q_lim_override = false;
-    if(nh.hasParam("q_min") || nh.hasParam("q_max"))
-    {
-        sas::get_ros_param(nh,"/q_min",robot_driver_ros_configuration.q_min);
-        sas::get_ros_param(nh,"/q_max",robot_driver_ros_configuration.q_max);
-        q_lim_override = true;
-    }else
-    {
-
-    }
-    robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
-
-    sas::RobotDriverFrankaHand franka_hand_driver(
+    qros::EffectorDriverFrankaHand franka_hand_driver(
+        effector_driver_provider_prefix,
         robot_driver_franka_hand_configuration,
-        robot_driver_ros_configuration,
+        nh,
         &kill_this_process
     );
     try

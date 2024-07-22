@@ -1,7 +1,3 @@
 "robot_ip_address": "172.16.0.2"
-"robot_mode": "PositionControl"
-"robot_speed": 20.0
-"thread_sampling_time_nsec": 40000000
-"q_min": [0.00]
-"q_max": [0.04]
+"thread_sampeling_time_ns": 100000000
 

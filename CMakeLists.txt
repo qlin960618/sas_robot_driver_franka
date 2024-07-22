@@ -25,12 +25,36 @@ find_package(catkin REQUIRED COMPONENTS
         sas_clock
         sas_robot_driver
         sas_patient_side_manager
+        message_generation
         pybind11_catkin
 )
 
+
+add_service_files(
+        DIRECTORY srv
+        FILES
+        Move.srv
+        Grasp.srv
+)
+
+add_message_files(
+        DIRECTORY msg
+        FILES
+        GripperState.msg
+)
+
+catkin_python_setup()
+
+generate_messages(
+        DEPENDENCIES
+        std_msgs
+
+)
+
+
 catkin_package(
         INCLUDE_DIRS include
-        CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver tf2_ros tf2 pybind11_catkin
+        CATKIN_DEPENDS roscpp rospy sas_common sas_clock sas_robot_driver tf2_ros tf2 pybind11_catkin message_runtime std_msgs
 )
 
 find_package(Franka REQUIRED)
@@ -121,9 +145,10 @@ target_link_libraries(sas_robot_driver_franka
         dqrobotics-interface-json11
         robot_interface_franka)
 
-add_library(sas_robot_driver_franka_hand src/hand/sas_robot_driver_franka_hand.cpp)
-target_link_libraries(sas_robot_driver_franka_hand
+add_library(qros_effector_driver_franka_hand src/hand/qros_effector_driver_franka_hand.cpp)
+target_link_libraries(qros_effector_driver_franka_hand
         dqrobotics
+#        robot_interface_hand
         Franka::Franka)
 
 
@@ -134,6 +159,8 @@ target_link_libraries(sas_robot_driver_coppelia
 
 add_dependencies(sas_robot_driver_franka ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(sas_robot_driver_coppelia ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(qros_effector_driver_franka_hand ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 add_executable(sas_robot_driver_coppelia_node src/sas_robot_driver_coppelia_node.cpp)
 target_link_libraries(sas_robot_driver_coppelia_node
@@ -148,7 +175,7 @@ target_link_libraries(sas_robot_driver_franka_node
 
 add_executable(sas_robot_driver_franka_hand_node src/sas_robot_driver_franka_hand_node.cpp)
 target_link_libraries(sas_robot_driver_franka_hand_node
-        sas_robot_driver_franka_hand
+        qros_effector_driver_franka_hand
         ${catkin_LIBRARIES})
 
 
@@ -210,4 +237,3 @@ install(TARGETS _qros_robot_dynamic
         LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}
 )
 
-catkin_python_setup()

@@ -60,6 +60,7 @@
   <build_depend>sas_common</build_depend>
   <build_depend>sas_patient_side_manager</build_depend>
   <build_depend>pybind11_catkin</build_depend>
+  <build_depend>message_generation</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
@@ -82,6 +83,7 @@
   <exec_depend>sas_robot_driver</exec_depend>
   <exec_depend>sas_common</exec_depend>
   <exec_depend>sas_patient_side_manager</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
