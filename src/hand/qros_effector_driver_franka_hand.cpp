@@ -180,11 +180,7 @@ namespace qros
     bool EffectorDriverFrankaHand::_grasp_srv_callback(sas_robot_driver_franka::Grasp::Request& req,
                                                        sas_robot_driver_franka::Grasp::Response& res)
     {
-        ROS_INFO_STREAM(
-            "["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::Grasping...");
-        ROS_INFO_STREAM(
-            "["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::Width: " + std::
-            to_string(req.width));
+        ROS_DEBUG_STREAM("["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::Grasping...");
         auto force = req.force;
         auto speed = req.speed;
         auto epsilon_inner = req.epsilon_inner;
@@ -193,9 +189,8 @@ namespace qros
         if (speed <= 0.0) speed = configuration_.default_speed;
         if (epsilon_inner <= 0.0) epsilon_inner = configuration_.default_epsilon_inner;
         if (epsilon_outer <= 0.0) epsilon_outer = configuration_.default_epsilon_outer;
-        ROS_INFO_STREAM(
-            "["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::force: " + std::
-            to_string(force) + " speed: " + std::to_string(speed));
+        ROS_DEBUG_STREAM("["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::Width: " + std::to_string(req.width));
+        ROS_DEBUG_STREAM("["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::force: " + std::to_string(force) + " speed: " + std::to_string(speed));
         bool ret = false;
         bool function_ret = true;
         gripper_in_use_.lock();
@@ -225,12 +220,10 @@ namespace qros
     bool EffectorDriverFrankaHand::_move_srv_callback(sas_robot_driver_franka::Move::Request& req,
                                                       sas_robot_driver_franka::Move::Response& res)
     {
-        ROS_INFO_STREAM("["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_move_srv_callback::Moving...");
+        ROS_DEBUG_STREAM("["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_move_srv_callback::Moving...");
         auto speed = req.speed;
         if (speed <= 0.0) speed = configuration_.default_speed;
-        ROS_INFO_STREAM(
-            "["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_move_srv_callback::Speed: " + std::to_string
-            (speed) + " Width: " + std::to_string(req.width));
+        ROS_DEBUG_STREAM("["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_move_srv_callback::Speed: " + std::to_string(speed) + " Width: " + std::to_string(req.width));
         bool ret = false;
         bool function_ret = true;
         gripper_in_use_.lock();
@@ -304,10 +297,7 @@ namespace qros
 #ifdef BLOCK_READ_IN_USED
                     if (should_unlock) gripper_in_use_.unlock();
 #endif
-                    ROS_INFO_STREAM(
-                        "["+ ros::this_node::getName()+
-                        "]::[EffectorDriverFrankaHand]::_gripper_status_loop::Could not read gripper state. Unavailable.")
-                    ;
+                    ROS_INFO_STREAM("["+ ros::this_node::getName()+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Could not read gripper state. Unavailable.");
                     sas_robot_driver_franka::GripperState msg;
                     msg.width = 0.0;
                     gripper_status_publisher_.publish(msg);
