@@ -1,107 +1,55 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.0.2)
 project(sas_robot_driver_franka)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 #add_compile_options(-std=c++11)
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-if(POLICY CMP0148)
-    cmake_policy(SET CMP0148 NEW)
-endif()
+add_compile_options(-Werror=return-type)
+
 
 #Add custom (non compiling) targets so launch scripts and python files show up in QT Creator's project view.
 file(GLOB_RECURSE EXTRA_FILES */*)
 #add_custom_target(${PROJECT_NAME}_OTHER_FILES ALL WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} SOURCES ${EXTRA_FILES})
 add_custom_target(cfg ALL WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} SOURCES ${EXTRA_FILES})
 
-
-find_package(pybind11 REQUIRED)
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(sas_common REQUIRED)
-find_package(sas_core REQUIRED)
-find_package(sas_conversions REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(sas_robot_driver REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-
-
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-        "msg/GripperState.msg"
-        "srv/Move.srv"
-        "srv/Grasp.srv"
-        DEPENDENCIES std_msgs
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+        roscpp
+        rospy
+        std_msgs
+        tf2_ros
+        tf2
+        sas_common
+        sas_clock
+        sas_robot_driver
+        sas_patient_side_manager
+        message_generation
+        pybind11_catkin
 )
 
-ament_target_dependencies(${PROJECT_NAME}
-        rclcpp geometry_msgs std_msgs sas_common sas_core sas_conversions
-        tf2_ros tf2 sas_robot_driver)
 
-
-target_include_directories(${PROJECT_NAME}
-        PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>)
-
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(Eigen3 rclcpp geometry_msgs std_msgs sas_common sas_core sas_conversions
-        tf2_ros tf2 sas_robot_driver)
-
-
-add_library(qros_robot_dynamics_provider src/robot_dynamics/qros_robot_dynamics_provider.cpp)
-target_link_libraries(qros_robot_dynamics_provider
-        -ldqrobotics
-        Eigen3::Eigen
+add_service_files(
+        DIRECTORY srv
+        FILES
+        Move.srv
+        Grasp.srv
 )
 
-#####################################################################################
-ament_python_install_package(${PROJECT_NAME})
-# python binding
-include_directories(
-        include/robot_dynamic
+add_message_files(
+        DIRECTORY msg
+        FILES
+        GripperState.msg
 )
-pybind_add_module(_qros_robot_dynamic SHARED
-        src/robot_dynamics/qros_robot_dynamic_py.cpp src/robot_dynamics/qros_robot_dynamics_interface.cpp src/robot_dynamics/qros_robot_dynamics_provider.cpp
+
+catkin_python_setup()
+
+generate_messages(
+        DEPENDENCIES
+        std_msgs
+
 )
-target_compile_definitions(_qros_robot_dynamic PRIVATE BUILD_PYBIND)
-# https://github.com/pybind/pybind11/issues/387
-target_link_libraries(_qros_robot_dynamic PRIVATE ${catkin_LIBRARIES} -ldqrobotics)
-
-
-
-
-
-
-
-
-#/////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 catkin_package(
