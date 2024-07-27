@@ -1,48 +1,61 @@
-import rospy
+import threading
 
+from sas_common import rclcpp_init, rclcpp_Node, rclcpp_spin_some, rclcpp_shutdown
+import rclpy
 from sas_robot_driver_franka import FrankaGripperInterface
+import time
 
 
-def main_loop():
-    rate = rospy.Rate(10)  # 10 Hz
+def main_loop(node):
     iteration_ = 0
-
-    hand1 = FrankaGripperInterface("/franka_hand_1")
+    node_name = node.get_name()
+    hand1 = FrankaGripperInterface(node, "/franka_hand_1")
+    logger = rclpy.node.get_logger(node_name)
 
     while not hand1.is_enabled():
-        rospy.loginfo("Waiting for gripper to be enabled...")
-        rate.sleep()
-    rospy.loginfo("Gripper enabled!")
+        logger.info("Waiting for gripper to be enabled...")
+        rclcpp_spin_some(node)
+        time.sleep(0.1)
+    rclpy.node.get_logger(node_name).info("Gripper enabled!")
 
-    rate = rospy.Rate(2)  # 0.5 Hz
+    def spin_all(node_):
+        while rclpy.ok():
+            rclcpp_spin_some(node_)
+            rclpy.spin_once(node_, timeout_sec=0.1)
+            time.sleep(0.1)
+            
+    thread = threading.Thread(target=spin_all, args=(node, ), daemon=True)
+    thread.start()
+    
+    rate = node.create_rate(2)
 
-    while not rospy.is_shutdown():
-        rospy.loginfo("Main loop running...")
+    while rclpy.ok():
+        logger.info("Main loop running...")
 
         # Get the temperature of the gripper
         temperature = hand1.get_temperature()
-        rospy.loginfo(f"Temperature: {temperature}")
+        logger.info(f"Temperature: {temperature}")
         max_width = hand1.get_max_width()
-        rospy.loginfo(f"Max width: {max_width}")
+        logger.info(f"Max width: {max_width}")
         width = hand1.get_width()
-        rospy.loginfo(f"Width: {width}")
+        logger.info(f"Width: {width}")
         is_grasped = hand1.is_grasped()
-        rospy.loginfo(f"Is grasped: {is_grasped}")
+        logger.info(f"Is grasped: {is_grasped}")
         is_moving = hand1.is_moving()
-        rospy.loginfo(f"Is moving: {is_moving}")
+        logger.info(f"Is moving: {is_moving}")
         is_grasping = hand1.is_grasping()
-        rospy.loginfo(f"Is grasping: {is_grasping}")
-        rospy.logwarn("calling move(0.01)")
+        logger.info(f"Is grasping: {is_grasping}")
+        logger.warn("calling move(0.01)")
         if not hand1.is_busy():
             hand1.grasp(0.01)
         else:
-            rospy.logwarn("Gripper is busy. Waiting...")
+            logger.warn("Gripper is busy. Waiting...")
         result_ready = hand1.is_done()
         if not result_ready:
-            rospy.loginfo("Waiting for gripper to finish moving...")
+            logger.info("Waiting for gripper to finish moving...")
         else:
             result = hand1.get_result()
-            rospy.loginfo(f"Result: {result}")
+            logger.info(f"Result: {result}")
 
 
         # Check if there is a response in the queue
@@ -50,7 +63,12 @@ def main_loop():
         iteration_ += 1
         rate.sleep()
 
+    rclpy.shutdown()
+    thread.join()
+
 
 if __name__ == "__main__":
-    rospy.init_node("example_gripper_control_node")
-    main_loop()
+    rclpy.init()
+    node_name_ = "example_gripper_control_node"
+    NODE = rclpy.create_node(node_name_)
+    main_loop(NODE)

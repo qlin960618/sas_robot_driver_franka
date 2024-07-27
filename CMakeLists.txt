@@ -198,6 +198,31 @@ install(TARGETS
         DESTINATION lib/${PROJECT_NAME})
 
 
+##### JuanEmika
+
+add_executable(JuankaEmika
+        qt/configuration_window/main.cpp
+        qt/configuration_window/mainwindow.cpp
+        qt/configuration_window/mainwindow.ui
+)
+ament_target_dependencies(sas_robot_driver_franka_node
+        rclcpp sas_common sas_core
+        sas_robot_driver)
+
+target_link_libraries(JuankaEmika PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+        dqrobotics
+        robot_interface_franka
+)
+
+if (QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(JuankaEmika)
+endif ()
+
+install(TARGETS
+        JuankaEmika
+        DESTINATION lib/${PROJECT_NAME})
+
+
 ##### PYBIND11 LIBRARY ROBOT_DYNAMICS #####
 ament_python_install_package(${PROJECT_NAME})
 

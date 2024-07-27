@@ -7,7 +7,7 @@
 
 #include <QMainWindow>
 #include "qspinbox.h"
-#include "robot_interface_franka.h"
+#include <sas_robot_driver_franka/interfaces/robot_interface_franka.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

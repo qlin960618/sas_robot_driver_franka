@@ -1,5 +1,5 @@
 import rospy
-from sas_robot_driver_franka import RobotDynamicsProvider
+from sas_robot_driver_franka import RobotDynamicsServer
 import dqrobotics as dql
 import numpy as np
 
