@@ -30,10 +30,7 @@
 */
 
 
-#include "robot_interface_franka.h"
-
-#include <ros/this_node.h>
-#include <rosconsole/macros_generated.h>
+#include <sas_robot_driver_franka/interfaces/robot_interface_franka.h>
 
 
 /**
@@ -313,7 +310,8 @@ void RobotInterfaceFranka::initialize()
     initialize_flag_ = true;
 
     // initialize and set the robot to default behavior (collision behavior, impedance, etc)
-    setDefaultBehavior(*robot_sptr_);
+    // robot_sptr_->setDefaultBehavior();
+    // setDefaultBehavior(*robot_sptr_);
     robot_sptr_->setCollisionBehavior(
         franka_configuration_.lower_torque_threshold,
         franka_configuration_.upper_torque_threshold,

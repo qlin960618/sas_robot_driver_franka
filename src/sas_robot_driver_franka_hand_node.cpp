@@ -33,10 +33,9 @@
 
 #include <exception>
 #include <dqrobotics/utils/DQ_Math.h>
-#include <sas_common/sas_common.h>
-#include <sas_conversions/eigen3_std_conversions.h>
-#include <sas_robot_driver/sas_robot_driver_ros.h>
-#include "hand/qros_effector_driver_franka_hand.h"
+#include <sas_common/sas_common.hpp>
+// #include <sas_conversions/eigen3_std_conversions.hpp>
+#include <sas_robot_driver_franka/interfaces/qros_effector_driver_franka_hand.h>
 
 
 /*********************************************
@@ -52,14 +51,14 @@ void sig_int_handler(int)
 
 
 template<typename T>
-void get_optional_parameter(const std::string &node_prefix, ros::NodeHandle &nh, const std::string &param_name, T &param)
+void get_optional_parameter(std::shared_ptr<Node> node, const std::string &param_name, T &param)
 {
-    if(nh.hasParam(node_prefix + param_name))
+    if(node->has_parameter(param_name))
     {
-        sas::get_ros_param(nh,param_name,param);
+        sas::get_ros_parameter(node,param_name,param);
     }else
     {
-        ROS_INFO_STREAM(ros::this_node::getName() + "::Parameter " + param_name + " not found. Using default value. " + std::to_string(param));
+        RCLCPP_INFO_STREAM(node->get_logger(), "["+std::string(node->get_name())+"]:Parameter " + param_name + " not found. Using default value. " + std::to_string(param));
     }
 
 }
@@ -69,55 +68,53 @@ int main(int argc, char **argv)
 {
     if(signal(SIGINT, sig_int_handler) == SIG_ERR)
     {
-        throw std::runtime_error(ros::this_node::getName() + "::Error setting the signal int handler.");
+        throw std::runtime_error("Error setting the signal int handler.");
     }
-    ros::init(argc, argv, "sas_robot_driver_franka_hand_node", ros::init_options::NoSigintHandler);
-    ROS_WARN("=====================================================================");
-    ROS_WARN("---------------------------Quentin Lin-------------------------------");
-    ROS_WARN("=====================================================================");
-    ROS_INFO_STREAM(ros::this_node::getName()+"::Loading parameters from parameter server.");
-    const std::string& effector_driver_provider_prefix = ros::this_node::getName();
 
+    rclcpp::init(argc,argv,rclcpp::InitOptions(),rclcpp::SignalHandlerOptions::None);
+    auto node = std::make_shared<rclcpp::Node>("sas_robot_driver_franka_hand_node");
 
-    ros::NodeHandle nh;
+    const auto node_name = std::string(node->get_name());
+    RCLCPP_WARN(node->get_logger(),"=====================================================================");
+    RCLCPP_WARN(node->get_logger(),"---------------------------Quentin Lin-------------------------------");
+    RCLCPP_WARN(node->get_logger(),"=====================================================================");
+    RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Loading parameters from parameter server.");
+
     qros::EffectorDriverFrankaHandConfiguration robot_driver_franka_hand_configuration;
-
-    sas::get_ros_param(nh,"/robot_ip_address",robot_driver_franka_hand_configuration.robot_ip);
-
-    get_optional_parameter(effector_driver_provider_prefix,nh,"/thread_sampling_time_nsec",robot_driver_franka_hand_configuration.thread_sampeling_time_ns);
-    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_force",robot_driver_franka_hand_configuration.default_force);
-    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_speed",robot_driver_franka_hand_configuration.default_speed);
-    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_epsilon_inner",robot_driver_franka_hand_configuration.default_epsilon_inner);
-    get_optional_parameter(effector_driver_provider_prefix,nh,"/default_epsilon_outer",robot_driver_franka_hand_configuration.default_epsilon_outer);
+    sas::get_ros_parameter(node,"robot_ip_address",robot_driver_franka_hand_configuration.robot_ip);
+    sas::get_ros_parameter(node,"thread_sampling_time_sec",robot_driver_franka_hand_configuration.thread_sampeling_time_s);
+    sas::get_ros_parameter(node,"default_force",robot_driver_franka_hand_configuration.default_force);
+    sas::get_ros_parameter(node,"default_speed",robot_driver_franka_hand_configuration.default_speed);
+    sas::get_ros_parameter(node,"default_epsilon_inner",robot_driver_franka_hand_configuration.default_epsilon_inner);
+    sas::get_ros_parameter(node,"default_epsilon_outer",robot_driver_franka_hand_configuration.default_epsilon_outer);
 
     qros::EffectorDriverFrankaHand franka_hand_driver(
-        effector_driver_provider_prefix,
+        node_name,
         robot_driver_franka_hand_configuration,
-        nh,
+        node,
         &kill_this_process
     );
     try
     {
-        ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating Franka hand.");
+        RCLCPP_INFO_STREAM(node->get_logger(),"["+node_name+"]::Instantiating Franka hand.");
         franka_hand_driver.connect();
         franka_hand_driver.initialize();
-
-        ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating control loop.");
+        RCLCPP_INFO_STREAM(node->get_logger(),"["+node_name+"]::Starting control loop.");
         franka_hand_driver.start_control_loop();
 
     }
     catch (const std::exception& e)
     {
-        ROS_ERROR_STREAM(ros::this_node::getName() + "::Exception::" + e.what());
+        RCLCPP_ERROR_STREAM(node->get_logger(), "["+node_name+"]::Exception::" + e.what());
     }catch (...)
     {
-        ROS_ERROR_STREAM(ros::this_node::getName() + "::Exception::Unknown exception.");
+        RCLCPP_ERROR_STREAM(node->get_logger(), "["+node_name+"]::Exception::Unknown exception.");
     }
-    ROS_INFO_STREAM(ros::this_node::getName()+"::Exiting...");
+    RCLCPP_INFO_STREAM(node->get_logger(),"["+node_name+"]::Exiting...");
     franka_hand_driver.deinitialize();
-    ROS_INFO_STREAM(ros::this_node::getName()+"::deinitialized.");
+    RCLCPP_INFO_STREAM(node->get_logger(),"["+node_name+"]::Deinitialized.");
     franka_hand_driver.disconnect();
-    ROS_INFO_STREAM(ros::this_node::getName()+"::disconnected.");
+    RCLCPP_INFO_STREAM(node->get_logger(),"["+node_name+"]::Disconnected.");
 
 
   return 0;

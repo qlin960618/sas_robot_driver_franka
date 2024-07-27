@@ -31,15 +31,18 @@
 */
 
 
-#include "../../include/sas_robot_driver_franka.h"
-#include "sas_clock/sas_clock.h"
+#include <sas_robot_driver_franka/sas_robot_driver_franka.h>
+#include <sas_core/sas_clock.hpp>
 #include <dqrobotics/utils/DQ_Math.h>
-#include <ros/this_node.h>
-#include <rosconsole/macros_generated.h>
+
 
 namespace sas
 {
-    RobotDriverFranka::RobotDriverFranka(qros::RobotDynamicProvider* robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops):
+    RobotDriverFranka::RobotDriverFranka(
+        const std::shared_ptr<Node> &node,
+        qros::RobotDynamicsServer* robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops
+    ):
+    node_(node),
     RobotDriver(break_loops),
     configuration_(configuration),
     robot_dynamic_provider_(robot_dynamic_provider),
@@ -143,7 +146,9 @@ namespace sas
     VectorXd  RobotDriverFranka::get_joint_positions()
     {
         if(robot_driver_interface_sptr_->get_err_state()) {
-            ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),
+                "["+std::string(node_->get_name())+"]::driver interface "
+                "error on:"+robot_driver_interface_sptr_->get_status_message());
             break_loops_->store(true);
         }
         _update_stiffness_contact_and_pose();
@@ -160,7 +165,9 @@ namespace sas
     {
         robot_driver_interface_sptr_->set_target_joint_positions(desired_joint_positions_rad);
         if(robot_driver_interface_sptr_->get_err_state()) {
-            ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),
+                "["+std::string(node_->get_name())+"]::driver interface "
+                "error on:"+robot_driver_interface_sptr_->get_status_message());
             break_loops_->store(true);
         }
     }
@@ -185,7 +192,9 @@ namespace sas
         desired_joint_velocities_ = desired_joint_velocities;
         robot_driver_interface_sptr_->set_target_joint_velocities(desired_joint_velocities);
         if(robot_driver_interface_sptr_->get_err_state()) {
-            ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),
+                                "["+std::string(node_->get_name())+"]::driver interface "
+                                "error on:"+robot_driver_interface_sptr_->get_status_message());
             break_loops_->store(true);
         }
     }
