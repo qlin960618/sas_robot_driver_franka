@@ -9,12 +9,12 @@
   <license>LGPLv3</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>roscpp</depend>
-  <depend>rospy</depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
   <depend>tf2_ros</depend>
   <depend>tf2</depend>
   <depend>std_msgs</depend>
-  <depend>sas_clock</depend>
+  <depend>sas_core</depend>
   <depend>sas_robot_driver</depend>
   <depend>sas_common</depend>
   <depend>sas_robot_driver_franka_interface</depend>
