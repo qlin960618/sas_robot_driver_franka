@@ -130,6 +130,16 @@ int main(int argc, char **argv)
         robot_driver_franka_configuration.robot_reference_frame = robot.get_reference_frame();
     }else{ROS_INFO_STREAM(ros::this_node::getName()+"::Robot parameter file path not set. Robot Model Unknow.");}
 
+    if(nh.hasParam(ros::this_node::getName()+"/automatic_error_recovery")) {
+        sas::get_ros_param(nh,"/automatic_error_recovery",robot_driver_franka_configuration.automatic_error_recovery);
+        if(robot_driver_franka_configuration.automatic_error_recovery)
+        {
+            ROS_WARN_STREAM(ros::this_node::getName()+"::Automatic error recovery enabled. STATUS EXPERIMENTAL");
+        }
+    }
+
+
+
     robot_driver_franka_configuration.interface_configuration = franka_interface_configuration;
 
     sas::RobotDriverROSConfiguration robot_driver_ros_configuration;

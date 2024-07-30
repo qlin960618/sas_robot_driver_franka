@@ -137,6 +137,9 @@ target_link_libraries(qros_robot_dynamics_interface
         ${catkin_LIBRARIES}
         dqrobotics)
 
+add_dependencies(qros_robot_dynamics_interface ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(qros_robot_dynamics_interface ${catkin_EXPORTED_TARGETS})
+
 
 add_library(sas_robot_driver_franka src/joint/sas_robot_driver_franka.cpp)
 target_link_libraries(sas_robot_driver_franka
@@ -150,7 +153,8 @@ target_link_libraries(qros_effector_driver_franka_hand
         dqrobotics
 #        robot_interface_hand
         Franka::Franka)
-
+add_dependencies(qros_effector_driver_franka_hand ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(qros_effector_driver_franka_hand ${catkin_EXPORTED_TARGETS})
 
 add_library(sas_robot_driver_coppelia src/coppelia/sas_robot_driver_coppelia.cpp)
 target_link_libraries(sas_robot_driver_coppelia
@@ -200,6 +204,8 @@ include_directories(
 pybind_add_module(_qros_robot_dynamic SHARED
         src/robot_dynamics/qros_robot_dynamic_py.cpp src/robot_dynamics/qros_robot_dynamics_interface.cpp src/robot_dynamics/qros_robot_dynamics_provider.cpp
 )
+add_dependencies(_qros_robot_dynamic ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 target_compile_definitions(_qros_robot_dynamic PRIVATE BUILD_PYBIND)
 # https://github.com/pybind/pybind11/issues/387
 target_link_libraries(_qros_robot_dynamic PRIVATE ${catkin_LIBRARIES} -ldqrobotics)

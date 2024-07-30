@@ -61,6 +61,7 @@ struct RobotDriverFrankaConfiguration
     double speed;
     RobotInterfaceFranka::FrankaInterfaceConfiguration interface_configuration;
     DQ robot_reference_frame = DQ(0);
+    bool automatic_error_recovery = false;
 };
 
 
