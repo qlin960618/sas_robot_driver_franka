@@ -146,6 +146,10 @@ namespace sas
             ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::driver interface error on:"+robot_driver_interface_sptr_->get_status_message());
             break_loops_->store(true);
         }
+        if(!ros::ok()) {
+            ROS_ERROR_STREAM("["+ros::this_node::getName()+"]::ROS shutdown requested.");
+            break_loops_->store(true);
+        }
         _update_stiffness_contact_and_pose();
         return robot_driver_interface_sptr_->get_joint_positions();
     }
