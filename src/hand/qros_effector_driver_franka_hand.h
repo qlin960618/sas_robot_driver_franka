@@ -48,11 +48,7 @@
 #include <sas_robot_driver_franka/Grasp.h>
 #include <sas_robot_driver_franka/Move.h>
 #include <sas_robot_driver_franka/GripperState.h>
-#ifdef IN_TESTING
-#include <Move.h> // dummy include
-#include <Grasp.h>  // dummy include
-#include <GripperState.h> // dummy include
-#endif
+
 
 
 // using namespace DQ_robotics;

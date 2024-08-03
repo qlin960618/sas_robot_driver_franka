@@ -151,7 +151,6 @@ target_link_libraries(sas_robot_driver_franka
 add_library(qros_effector_driver_franka_hand src/hand/qros_effector_driver_franka_hand.cpp)
 target_link_libraries(qros_effector_driver_franka_hand
         dqrobotics
-#        robot_interface_hand
         Franka::Franka)
 add_dependencies(qros_effector_driver_franka_hand ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(qros_effector_driver_franka_hand ${catkin_EXPORTED_TARGETS})
