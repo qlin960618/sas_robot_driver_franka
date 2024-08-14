@@ -26,6 +26,8 @@
 #      1. Juan Jose Quiroz Omana (juanjqogm@gmail.com)
 #         - Adapted from sas_robot_driver_denso_node.cpp
 #           (https://github.com/SmartArmStack/sas_robot_driver_denso/blob/master/src/sas_robot_driver_denso_node.cpp)
+#      2. Quentin Lin (qlin1806@g.ecc.u-tokyo.ac.jp)
+          -Adapted for simplify operation
 #
 # ################################################################
 */
@@ -52,6 +54,7 @@ void sig_int_handler(int)
 }
 
 
+
 int main(int argc, char **argv)
 {
     if(signal(SIGINT, sig_int_handler) == SIG_ERR)
@@ -61,39 +64,37 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "sas_robot_driver_coppelia_node", ros::init_options::NoSigintHandler);
     ROS_WARN("=====================================================================");
-    ROS_WARN("----------------------Juan Jose Quiroz Omana------------------------");
+    ROS_WARN("--------------------- Quentin Lin -----------------------------------");
     ROS_WARN("=====================================================================");
     ROS_INFO_STREAM(ros::this_node::getName()+"::Loading parameters from parameter server.");
 
 
     ros::NodeHandle nh;
     sas::RobotDriverCoppeliaConfiguration robot_driver_coppelia_configuration;
+    sas::get_ros_param(nh,"/thread_sampling_time_nsec",robot_driver_coppelia_configuration.thread_sampling_time_nsec);
+    sas::get_ros_param(nh,"/vrep_ip",robot_driver_coppelia_configuration.vrep_ip);
+    sas::get_ros_param(nh,"/vrep_port",robot_driver_coppelia_configuration.vrep_port);
+    sas::get_ros_param(nh,"/vrep_joint_names", robot_driver_coppelia_configuration.vrep_joint_names);
+    sas::get_ros_param(nh,"/vrep_dynamically_enabled", robot_driver_coppelia_configuration.vrep_dynamically_enabled);
+    sas::get_ros_param(nh,"/robot_mode", robot_driver_coppelia_configuration.robot_mode);
+    sas::get_ros_param(nh,"/using_real_robot", robot_driver_coppelia_configuration.using_real_robot);
+    sas::get_ros_param(nh,"/robot_topic_prefix", robot_driver_coppelia_configuration.robot_topic_prefix);
+    sas::get_ros_param(nh,"/robot_parameter_file_path", robot_driver_coppelia_configuration.robot_parameter_file_path);
 
-    sas::get_ros_param(nh,"/robot_ip_address",robot_driver_coppelia_configuration.ip);
-    sas::get_ros_param(nh,"/robot_mode",      robot_driver_coppelia_configuration.robot_mode);
-    sas::get_ros_param(nh,"/vrep_port", robot_driver_coppelia_configuration.port);
-    sas::get_ros_param(nh,"/vrep_robot_joint_names", robot_driver_coppelia_configuration.jointnames);
-    sas::get_ros_param(nh,"/mirror_mode", robot_driver_coppelia_configuration.mirror_mode);
-    sas::get_ros_param(nh, "/real_robot_topic_prefix", robot_driver_coppelia_configuration.real_robot_topic_prefix);
-    sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
+    // std::vector<double> q_min_vec, q_max_vec;
+    // sas::get_ros_param(nh,"/q_min", q_min_vec);
+    // robot_driver_coppelia_configuration.q_min = sas::std_vector_double_to_vectorxd(q_min_vec);
+    // sas::get_ros_param(nh,"/q_max", q_max_vec);
+    // robot_driver_coppelia_configuration.q_max = sas::std_vector_double_to_vectorxd(q_max_vec);
 
-    sas::get_ros_param(nh,"/thread_sampling_time_nsec",robot_driver_ros_configuration.thread_sampling_time_nsec);
-    sas::get_ros_param(nh,"/q_min",robot_driver_ros_configuration.q_min);
-    sas::get_ros_param(nh,"/q_max",robot_driver_ros_configuration.q_max);
-
-    robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
 
     try
     {
         ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating Coppelia robot.");
-        sas::RobotDriverCoppelia robot_driver_coppelia(robot_driver_coppelia_configuration,
+        sas::RobotDriverCoppelia robot_driver_coppelia(nh, robot_driver_coppelia_configuration,
                                                        &kill_this_process);
-        ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating RobotDriverROS.");
-        sas::RobotDriverROS robot_driver_ros(nh,
-                                             &robot_driver_coppelia,
-                                             robot_driver_ros_configuration,
-                                             &kill_this_process);
-        robot_driver_ros.control_loop();
+
+        return robot_driver_coppelia.start_control_loop();
     }
     catch (const std::exception& e)
     {

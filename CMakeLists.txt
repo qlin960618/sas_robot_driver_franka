@@ -158,6 +158,7 @@ add_dependencies(qros_effector_driver_franka_hand ${catkin_EXPORTED_TARGETS})
 add_library(sas_robot_driver_coppelia src/coppelia/sas_robot_driver_coppelia.cpp)
 target_link_libraries(sas_robot_driver_coppelia
         dqrobotics
+        dqrobotics-interface-json11
         dqrobotics-interface-vrep)
 
 add_dependencies(sas_robot_driver_franka ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
