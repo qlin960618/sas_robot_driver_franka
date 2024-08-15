@@ -231,6 +231,14 @@ install(TARGETS sas_robot_driver_franka_hand_node
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+install(TARGETS qros_robot_dynamics_provider
+        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(TARGETS qros_robot_dynamics_interface
+        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
