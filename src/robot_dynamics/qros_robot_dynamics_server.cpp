@@ -34,7 +34,9 @@ using namespace qros;
 RobotDynamicsServer::RobotDynamicsServer(const std::shared_ptr<Node> &node, const std::string& topic_prefix):
     node_(node), topic_prefix_(topic_prefix == "GET_FROM_NODE"? node->get_name() : topic_prefix),
     child_frame_id_(topic_prefix_ + "_stiffness_frame"), parent_frame_id_(topic_prefix_ + "_base"),
-    world_to_base_tf_(0)
+    world_to_base_tf_(0),
+    tf_broadcaster_(std::make_shared<tf2_ros::TransformBroadcaster>(node_)),
+    static_base_tf_broadcaster_(std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_))
 {
     // Strip potential leading slash
     if(child_frame_id_.front() == '/'){child_frame_id_ = child_frame_id_.substr(1);}
@@ -74,10 +76,12 @@ void RobotDynamicsServer::set_world_to_base_tf(const DQ& world_to_base_tf)
 void RobotDynamicsServer::_publish_base_static_tf()
 {
     geometry_msgs::msg::TransformStamped base_tf;
-    base_tf.transform = _dq_to_geometry_msgs_transform(world_to_base_tf_);
-    base_tf.header.stamp = node_->now();
-    base_tf.header.frame_id = WORLD_FRAME_ID;
-    base_tf.child_frame_id = parent_frame_id_;
+    base_tf.set__transform(_dq_to_geometry_msgs_transform(world_to_base_tf_));
+    std_msgs::msg::Header header;
+    header.set__stamp(node_->now());
+    header.set__frame_id(WORLD_FRAME_ID);
+    base_tf.set__header(header);
+    base_tf.set__child_frame_id(parent_frame_id_);
     static_base_tf_broadcaster_->sendTransform(base_tf);
 
 }
@@ -88,7 +92,7 @@ void RobotDynamicsServer::publish_stiffness(const DQ& base_to_stiffness, const V
     std_msgs::msg::Header header;
     header.set__stamp(node_->now());
     geometry_msgs::msg::WrenchStamped msg;
-    msg.header = header;
+    msg.set__header(header);
     msg.header.set__frame_id(child_frame_id_);
     msg.wrench.force.set__x(force(0));
     msg.wrench.force.set__y(force(1));
@@ -99,10 +103,10 @@ void RobotDynamicsServer::publish_stiffness(const DQ& base_to_stiffness, const V
     publisher_cartesian_stiffness_->publish(msg);
     if(seq_ % REDUCE_TF_PUBLISH_RATE == 0)
     {
+        header.set__frame_id(parent_frame_id_);
         geometry_msgs::msg::TransformStamped tf_msg;
-        tf_msg.transform = _dq_to_geometry_msgs_transform(base_to_stiffness);
+        tf_msg.set__transform(_dq_to_geometry_msgs_transform(base_to_stiffness));
         tf_msg.set__header(header);
-        tf_msg.header.set__frame_id(parent_frame_id_);
         tf_msg.set__child_frame_id(child_frame_id_);
         tf_broadcaster_->sendTransform(tf_msg);
     }

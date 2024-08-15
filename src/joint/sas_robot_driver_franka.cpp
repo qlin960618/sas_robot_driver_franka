@@ -40,12 +40,12 @@ namespace sas
 {
     RobotDriverFranka::RobotDriverFranka(
         const std::shared_ptr<Node> &node,
-        qros::RobotDynamicsServer* robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops
+        const std::shared_ptr<qros::RobotDynamicsServer> &robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops
     ):
     node_(node),
     RobotDriver(break_loops),
     configuration_(configuration),
-    robot_dynamic_provider_(robot_dynamic_provider),
+    robot_dynamic_provider_sptr_(robot_dynamic_provider),
     break_loops_(break_loops)
    {
         joint_positions_.resize(7);
@@ -93,7 +93,7 @@ namespace sas
         Vector3d force, torque;
         std::tie(force, torque) = robot_driver_interface_sptr_->get_stiffness_force_torque();
         const auto pose = robot_driver_interface_sptr_->get_stiffness_pose();
-        robot_dynamic_provider_->publish_stiffness(pose, force, torque);
+        robot_dynamic_provider_sptr_->publish_stiffness(pose, force, torque);
     }
 
 
@@ -150,6 +150,11 @@ namespace sas
                 "["+std::string(node_->get_name())+"]::driver interface "
                 "error on:"+robot_driver_interface_sptr_->get_status_message());
             break_loops_->store(true);
+        }
+        if(!ok()) {
+            RCLCPP_WARN_STREAM(node_->get_logger(),
+                "["+std::string(node_->get_name())+"]::driver interface exit on shotdown signal recieved."
+                );
         }
         _update_stiffness_contact_and_pose();
         return robot_driver_interface_sptr_->get_joint_positions();

@@ -101,11 +101,15 @@ int main(int argc, char **argv)
     sas::get_ros_parameter(node,"robot_mode",      robot_driver_franka_configuration.mode);
     double upper_scale_factor = 1.0;
     std::vector<std::string> all_params;
-    if(node->has_parameter("force_upper_limits_scaling_factor"))
-    {
+
+    try {
         sas::get_ros_parameter(node,"force_upper_limits_scaling_factor",upper_scale_factor);
-        RCLCPP_WARN_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Set force upper limits scaling factor: " << upper_scale_factor);
+        RCLCPP_WARN_STREAM_ONCE(node->get_logger(),"Set force upper limits scaling factor: " << upper_scale_factor);
+    }catch(...) {
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"Force upper limits scaling factor is not set.");
     }
+
+    try{node->declare_parameter<std::vector<double>>("upper_torque_threshold");}catch (...){}
     if(node->has_parameter("upper_torque_threshold")) {
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper torque threshold override and set.");
         std::vector<double> upper_torque_threshold_std_vec;
@@ -115,6 +119,7 @@ int main(int argc, char **argv)
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper torque threshold not set. Using default with value scalling.");
         franka_interface_configuration.upper_torque_threshold = apply_scale_to_std_array(franka_interface_configuration.upper_torque_threshold, upper_scale_factor);
     }
+    try{node->declare_parameter<std::vector<double>>("upper_force_threshold");}catch (...){}
     if(node->has_parameter("upper_force_threshold")) {
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper force threshold override and set.");
         std::vector<double> upper_torque_threshold_std_vec;
@@ -124,6 +129,7 @@ int main(int argc, char **argv)
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper force threshold not set. Using default with value scalling.");
         franka_interface_configuration.upper_force_threshold = apply_scale_to_std_array(franka_interface_configuration.upper_force_threshold, upper_scale_factor);
     }
+    try{node->declare_parameter<std::string>("robot_parameter_file_path");}catch (...){}
     if(node->has_parameter("robot_parameter_file_path"))
     {
         std::string robot_parameter_file_path;
@@ -143,10 +149,10 @@ int main(int argc, char **argv)
 
     // initialize the robot dynamic provider
     robot_driver_ros_configuration.robot_driver_provider_prefix = node_name;
-    qros::RobotDynamicsServer robot_dynamic_provider(node, robot_driver_ros_configuration.robot_driver_provider_prefix);
+    std::shared_ptr<qros::RobotDynamicsServer> robot_dynamic_provider_ptr = std::make_shared<qros::RobotDynamicsServer>(node, robot_driver_ros_configuration.robot_driver_provider_prefix);
     if(robot_driver_franka_configuration.robot_reference_frame!=0)
     {
-        robot_dynamic_provider.set_world_to_base_tf(robot_driver_franka_configuration.robot_reference_frame);
+        robot_dynamic_provider_ptr->set_world_to_base_tf(robot_driver_franka_configuration.robot_reference_frame);
     }
 
     try
@@ -154,7 +160,7 @@ int main(int argc, char **argv)
             RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Instantiating Franka robot.");
             auto robot_driver_franka = std::make_shared<sas::RobotDriverFranka>(
                 node,
-                &robot_dynamic_provider,
+                robot_dynamic_provider_ptr,
                 robot_driver_franka_configuration,
                 &kill_this_process
             );

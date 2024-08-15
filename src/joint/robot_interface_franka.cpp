@@ -311,7 +311,7 @@ void RobotInterfaceFranka::initialize()
 
     // initialize and set the robot to default behavior (collision behavior, impedance, etc)
     // robot_sptr_->setDefaultBehavior();
-    // setDefaultBehavior(*robot_sptr_);
+    setDefaultBehavior(*robot_sptr_);
     robot_sptr_->setCollisionBehavior(
         franka_configuration_.lower_torque_threshold,
         franka_configuration_.upper_torque_threshold,

@@ -40,7 +40,7 @@
 
 #include <dqrobotics/DQ.h>
 
-#include <sas_robot_driver/sas_robot_driver.hpp>
+#include <sas_core/sas_robot_driver.hpp>
 #include <sas_robot_driver_franka/interfaces/robot_interface_franka.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_server.hpp>
@@ -64,7 +64,7 @@ struct RobotDriverFrankaConfiguration
 };
 
 
-class RobotDriverFranka: public sas_driver::RobotDriver
+class RobotDriverFranka: public sas::RobotDriver
 {
 private:
     std::shared_ptr<Node> node_;
@@ -73,7 +73,7 @@ private:
 
     std::shared_ptr<RobotInterfaceFranka> robot_driver_interface_sptr_ = nullptr;
 
-    qros::RobotDynamicsServer* robot_dynamic_provider_;
+    std::shared_ptr<qros::RobotDynamicsServer> robot_dynamic_provider_sptr_;
 
     //Joint positions
     VectorXd joint_positions_;
@@ -101,7 +101,7 @@ public:
 
     RobotDriverFranka(
         const std::shared_ptr<Node> &node,
-        qros::RobotDynamicsServer* robot_dynamic_provider,
+        const std::shared_ptr<qros::RobotDynamicsServer> &robot_dynamic_provider,
         const RobotDriverFrankaConfiguration& configuration,
         std::atomic_bool* break_loops
         );
