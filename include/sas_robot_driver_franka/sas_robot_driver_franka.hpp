@@ -41,7 +41,7 @@
 #include <dqrobotics/DQ.h>
 
 #include <sas_core/sas_robot_driver.hpp>
-#include <sas_robot_driver_franka/interfaces/robot_interface_franka.h>
+#include <sas_robot_driver_franka/interfaces/robot_interface_franka.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_server.hpp>
 

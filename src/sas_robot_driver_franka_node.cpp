@@ -41,7 +41,7 @@
 #include <sas_common/sas_common.hpp>
 #include <sas_conversions/eigen3_std_conversions.hpp>
 #include <sas_robot_driver/sas_robot_driver_ros.hpp>
-#include <sas_robot_driver_franka/sas_robot_driver_franka.h>
+#include <sas_robot_driver_franka/sas_robot_driver_franka.hpp>
 #include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_server.hpp>
 
 
@@ -75,6 +75,15 @@ std::array<T, N> std_vec_to_std_array(const std::vector<T>& vector)
         array[i] = vector[i];
     }
     return array;
+}
+VectorXd std_vec_to_eigen_vector(const std::vector<double>& vector)
+{
+    VectorXd eigen_vector(vector.size());
+    for(std::size_t i = 0; i < vector.size(); i++)
+    {
+        eigen_vector(i) = vector[i];
+    }
+    return eigen_vector;
 }
 
 
@@ -164,7 +173,8 @@ int main(int argc, char **argv)
                 robot_driver_franka_configuration,
                 &kill_this_process
             );
-            //robot_driver_franka.set_joint_limits({qmin, qmax});
+            std::tuple<VectorXd, VectorXd> joint_limits = {std_vec_to_eigen_vector(robot_driver_ros_configuration.q_min), std_vec_to_eigen_vector(robot_driver_ros_configuration.q_max)};
+            robot_driver_franka -> set_joint_limits(joint_limits);
             RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Instantiating RobotDriverROS.");
             sas::RobotDriverROS robot_driver_ros(node,
                                                 robot_driver_franka, 

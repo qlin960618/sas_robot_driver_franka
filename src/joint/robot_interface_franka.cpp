@@ -30,7 +30,7 @@
 */
 
 
-#include <sas_robot_driver_franka/interfaces/robot_interface_franka.h>
+#include <sas_robot_driver_franka/interfaces/robot_interface_franka.hpp>
 
 
 /**

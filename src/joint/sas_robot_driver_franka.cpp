@@ -31,7 +31,7 @@
 */
 
 
-#include <sas_robot_driver_franka/sas_robot_driver_franka.h>
+#include <sas_robot_driver_franka/sas_robot_driver_franka.hpp>
 #include <sas_core/sas_clock.hpp>
 #include <dqrobotics/utils/DQ_Math.h>
 
@@ -42,8 +42,8 @@ namespace sas
         const std::shared_ptr<Node> &node,
         const std::shared_ptr<qros::RobotDynamicsServer> &robot_dynamic_provider, const RobotDriverFrankaConfiguration &configuration, std::atomic_bool *break_loops
     ):
-    node_(node),
     RobotDriver(break_loops),
+    node_(node),
     configuration_(configuration),
     robot_dynamic_provider_sptr_(robot_dynamic_provider),
     break_loops_(break_loops)
@@ -55,11 +55,10 @@ namespace sas
         //joint_positions_buffer_.resize(8,0);
         //end_effector_pose_euler_buffer_.resize(7,0);
         //end_effector_pose_homogenous_transformation_buffer_.resize(10,0);
-        std::cout<<configuration.ip_address<<std::endl;
+        // std::cout<<configuration.ip_address<<std::endl;
 
         RobotInterfaceFranka::MODE mode = RobotInterfaceFranka::MODE::None;
-
-        std::cout<<configuration.mode<<std::endl;
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Mode: " << configuration_.mode);
 
         if (configuration_.mode == std::string("None"))
         {

@@ -197,6 +197,24 @@ install(TARGETS
         sas_robot_driver_franka_hand_node
         DESTINATION lib/${PROJECT_NAME})
 
+##### Coppelia Mirror Node #####
+
+add_executable(sas_robot_driver_franka_coppelia_node
+    src/sas_robot_driver_coppelia_node.cpp
+    src/coppelia/sas_robot_driver_coppelia.cpp
+)
+ament_target_dependencies(sas_robot_driver_franka_coppelia_node
+        rclcpp sas_common sas_core sas_conversions sas_robot_driver
+)
+
+target_link_libraries(sas_robot_driver_franka_coppelia_node
+        dqrobotics
+        dqrobotics-interface-json11
+        dqrobotics-interface-vrep
+)
+install(TARGETS
+        sas_robot_driver_franka_coppelia_node
+        DESTINATION lib/${PROJECT_NAME})
 
 ##### JuanEmika
 

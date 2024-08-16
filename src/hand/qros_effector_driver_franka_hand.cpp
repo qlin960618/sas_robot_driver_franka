@@ -27,7 +27,7 @@
 #
 # ################################################################
 */
-#include <sas_robot_driver_franka/interfaces/qros_effector_driver_franka_hand.h>
+#include <sas_robot_driver_franka/interfaces/qros_effector_driver_franka_hand.hpp>
 
 #include <franka/exception.h>
 

@@ -26,6 +26,9 @@
 #      1. Juan Jose Quiroz Omana (juanjqogm@gmail.com)
 #         - Adapted from sas_robot_driver_denso_node.cpp
 #           (https://github.com/SmartArmStack/sas_robot_driver_denso/blob/master/src/sas_robot_driver_denso_node.cpp)
+#      2. Quentin Lin (qlin1806@g.ecc.u-tokyo.ac.jp)
+#         - Adapted for simplify operation
+#         - porting to ROS2
 #
 # ################################################################
 */
@@ -36,10 +39,9 @@
 #include <exception>
 #include <dqrobotics/utils/DQ_Math.h>
 //#include <dqrobotics/interfaces/json11/DQ_JsonReader.h>
-#include <sas_common/sas_common.h>
-#include <sas_conversions/eigen3_std_conversions.h>
-#include <sas_robot_driver/sas_robot_driver_ros.h>
-#include "coppelia/sas_robot_driver_coppelia.h"
+#include <sas_common/sas_common.hpp>
+#include <sas_conversions/eigen3_std_conversions.hpp>
+#include <sas_robot_driver_franka/coppelia/sas_robot_driver_coppelia.hpp>
 
 /*********************************************
  * SIGNAL HANDLER
@@ -52,52 +54,51 @@ void sig_int_handler(int)
 }
 
 
+
 int main(int argc, char **argv)
 {
     if(signal(SIGINT, sig_int_handler) == SIG_ERR)
     {
-        throw std::runtime_error(ros::this_node::getName() + "::Error setting the signal int handler.");
+        throw std::runtime_error("Error setting the signal int handler.");
     }
 
-    ros::init(argc, argv, "sas_robot_driver_coppelia_node", ros::init_options::NoSigintHandler);
-    ROS_WARN("=====================================================================");
-    ROS_WARN("----------------------Juan Jose Quiroz Omana------------------------");
-    ROS_WARN("=====================================================================");
-    ROS_INFO_STREAM(ros::this_node::getName()+"::Loading parameters from parameter server.");
+    rclcpp::init(argc,argv,rclcpp::InitOptions(),rclcpp::SignalHandlerOptions::None);
+    auto context = rclcpp::contexts::get_global_default_context();
+
+    auto node = std::make_shared<rclcpp::Node>("sas_robot_driver_franka_coppelia_node");
+
+    const auto node_name = std::string(node->get_name());
+    RCLCPP_WARN(node->get_logger(),"=====================================================================");
+    RCLCPP_WARN(node->get_logger(),"-----------------Adapted by Quentin Lin ------------------------");
+    RCLCPP_WARN(node->get_logger(),"=====================================================================");
+    RCLCPP_INFO_STREAM_ONCE(node->get_logger(),":Loading parameters from parameter server.");
 
 
-    ros::NodeHandle nh;
-    sas::RobotDriverCoppeliaConfiguration robot_driver_coppelia_configuration;
-
-    sas::get_ros_param(nh,"/robot_ip_address",robot_driver_coppelia_configuration.ip);
-    sas::get_ros_param(nh,"/robot_mode",      robot_driver_coppelia_configuration.robot_mode);
-    sas::get_ros_param(nh,"/vrep_port", robot_driver_coppelia_configuration.port);
-    sas::get_ros_param(nh,"/vrep_robot_joint_names", robot_driver_coppelia_configuration.jointnames);
-    sas::get_ros_param(nh,"/mirror_mode", robot_driver_coppelia_configuration.mirror_mode);
-    sas::get_ros_param(nh, "/real_robot_topic_prefix", robot_driver_coppelia_configuration.real_robot_topic_prefix);
-    sas::RobotDriverROSConfiguration robot_driver_ros_configuration;
-
-    sas::get_ros_param(nh,"/thread_sampling_time_nsec",robot_driver_ros_configuration.thread_sampling_time_nsec);
-    sas::get_ros_param(nh,"/q_min",robot_driver_ros_configuration.q_min);
-    sas::get_ros_param(nh,"/q_max",robot_driver_ros_configuration.q_max);
-
-    robot_driver_ros_configuration.robot_driver_provider_prefix = ros::this_node::getName();
+    qros::RobotDriverCoppeliaConfiguration robot_driver_coppelia_configuration;
+    sas::get_ros_parameter(node,"thread_sampling_time_sec",robot_driver_coppelia_configuration.thread_sampling_time_sec);
+    sas::get_ros_parameter(node,"vrep_ip",robot_driver_coppelia_configuration.vrep_ip);
+    sas::get_ros_parameter(node,"vrep_port",robot_driver_coppelia_configuration.vrep_port);
+    sas::get_ros_parameter(node,"vrep_joint_names", robot_driver_coppelia_configuration.vrep_joint_names);
+    sas::get_ros_parameter(node,"vrep_dynamically_enabled", robot_driver_coppelia_configuration.vrep_dynamically_enabled);
+    sas::get_ros_parameter(node,"robot_mode", robot_driver_coppelia_configuration.robot_mode);
+    sas::get_ros_parameter(node,"using_real_robot", robot_driver_coppelia_configuration.using_real_robot);
+    sas::get_ros_parameter(node,"robot_topic_prefix", robot_driver_coppelia_configuration.robot_topic_prefix);
+    sas::get_ros_parameter(node,"robot_parameter_file_path", robot_driver_coppelia_configuration.robot_parameter_file_path);
 
     try
     {
-        ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating Coppelia robot.");
-        sas::RobotDriverCoppelia robot_driver_coppelia(robot_driver_coppelia_configuration,
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"::Instantiating Coppelia robot mirror.");
+        qros::RobotDriverCoppelia robot_driver_coppelia(node, robot_driver_coppelia_configuration,
                                                        &kill_this_process);
-        ROS_INFO_STREAM(ros::this_node::getName()+"::Instantiating RobotDriverROS.");
-        sas::RobotDriverROS robot_driver_ros(nh,
-                                             &robot_driver_coppelia,
-                                             robot_driver_ros_configuration,
-                                             &kill_this_process);
-        robot_driver_ros.control_loop();
+
+        return robot_driver_coppelia.start_control_loop();
     }
     catch (const std::exception& e)
     {
-        ROS_ERROR_STREAM(ros::this_node::getName() + "::Exception::" + e.what());
+        kill_this_process = true;
+        RCLCPP_ERROR_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Exception::" + e.what());
+        shutdown(context, "Exception in main function: " + std::string(e.what()));
+        return -1;
     }
 
 

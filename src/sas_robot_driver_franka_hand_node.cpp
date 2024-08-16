@@ -35,7 +35,7 @@
 #include <dqrobotics/utils/DQ_Math.h>
 #include <sas_common/sas_common.hpp>
 // #include <sas_conversions/eigen3_std_conversions.hpp>
-#include <sas_robot_driver_franka/interfaces/qros_effector_driver_franka_hand.h>
+#include <sas_robot_driver_franka/interfaces/qros_effector_driver_franka_hand.hpp>
 
 
 /*********************************************
