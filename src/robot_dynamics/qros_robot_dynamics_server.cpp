@@ -34,9 +34,9 @@ using namespace qros;
 RobotDynamicsServer::RobotDynamicsServer(const std::shared_ptr<Node> &node, const std::string& topic_prefix):
     node_(node), topic_prefix_(topic_prefix == "GET_FROM_NODE"? node->get_name() : topic_prefix),
     child_frame_id_(topic_prefix_ + "_stiffness_frame"), parent_frame_id_(topic_prefix_ + "_base"),
-    world_to_base_tf_(0),
     tf_broadcaster_(std::make_shared<tf2_ros::TransformBroadcaster>(node_)),
-    static_base_tf_broadcaster_(std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_))
+    static_base_tf_broadcaster_(std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_)),
+    world_to_base_tf_(0)
 {
     // Strip potential leading slash
     if(child_frame_id_.front() == '/'){child_frame_id_ = child_frame_id_.substr(1);}

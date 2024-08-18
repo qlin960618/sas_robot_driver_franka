@@ -1,6 +1,6 @@
 """
 """
-from sas_robot_driver_franka._robot_dynamics import RobotDynamicsInterface, RobotDynamicsProvider
+from sas_robot_driver_franka._qros_franka_robot_dynamic import RobotDynamicsClient, RobotDynamicsServer
 
 import rclpy
 from rclpy.node import Node

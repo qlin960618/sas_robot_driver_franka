@@ -40,7 +40,7 @@ using RDC = qros::RobotDynamicsClient;
 using RDS = qros::RobotDynamicsServer;
 
 
-PYBIND11_MODULE(_qros_robot_dynamic, m)
+PYBIND11_MODULE(_qros_franka_robot_dynamic, m)
 {
     py::class_<RDC>(m, "RobotDynamicsClient")
         .def(py::init<const std::shared_ptr<rclcpp::Node>&,const std::string&>())

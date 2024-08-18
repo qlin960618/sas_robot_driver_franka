@@ -62,7 +62,7 @@ private:
     std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_base_tf_broadcaster_;
 
-    DQ world_to_base_tf_;
+    DQ world_to_base_tf_ = DQ(0);
 
     static geometry_msgs::msg::Transform _dq_to_geometry_msgs_transform(const DQ& pose);
 
