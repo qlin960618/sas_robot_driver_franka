@@ -31,7 +31,7 @@ class FrankaGripperInterface:
         self.grasp_service = node.create_client(Grasp, os.path.join(robot_prefix, GRASP_TOPIC_SUFFIX))
         self._grasping = False
         self.status_subscriber = node.create_subscription(GripperState, os.path.join(robot_prefix, STATUS_TOPIC_SUFFIX),
-                                                          self._status_callback)
+                                                          self._status_callback, 5)
 
         self.result_queue = Queue()
 
