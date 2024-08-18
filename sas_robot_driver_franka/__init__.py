@@ -4,7 +4,7 @@ from sas_robot_driver_franka._qros_franka_robot_dynamic import RobotDynamicsClie
 
 import rclpy
 from rclpy.node import Node
-from sas_common import rclcpp_init, rclcpp_Node, rclcpp_spin_some, rclcpp_shutdown
+# from sas_common import rclcpp_init, rclcpp_Node, rclcpp_spin_some, rclcpp_shutdown
 from sas_robot_driver_franka_interfaces.srv import Move, Move_Request, Move_Response, Grasp, Grasp_Request, Grasp_Response
 from sas_robot_driver_franka_interfaces.msg import GripperState
 import os
@@ -40,6 +40,13 @@ class FrankaGripperInterface:
         self.state_max_width = None
         self.state_temperature = None
         self.state_is_grasped = None
+        self.spin_handler = self._default_spin_handler
+
+    def _default_spin_handler(self):
+        rclpy.spin_once(self.node)
+
+    def set_spin_handler(self, spin_handler):
+        self.spin_handler = spin_handler
 
     def _is_service_ready(self, service):
         try:
@@ -162,7 +169,7 @@ class FrankaGripperInterface:
         if not self._moving or self._grasping:
             raise Exception("Gripper is not moving or grasping")
         while self._moving or self._grasping:
-            rclcpp_spin_some(self.node)
+            self.spin_handler()
             time.sleep(0.1)
             if not self.result_queue.empty():
                 response = self.result_queue.get()
