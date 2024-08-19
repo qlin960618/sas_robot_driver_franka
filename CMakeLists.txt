@@ -244,22 +244,22 @@ install(TARGETS
 ##### PYBIND11 LIBRARY ROBOT_DYNAMICS #####
 ament_python_install_package(${PROJECT_NAME})
 
-pybind11_add_module(_robot_dynamics SHARED
+pybind11_add_module(_qros_franka_robot_dynamics_py SHARED
         src/robot_dynamics/qros_robot_dynamics_py.cpp
         src/robot_dynamics/qros_robot_dynamics_client.cpp
         src/robot_dynamics/qros_robot_dynamics_server.cpp
 )
 
-target_include_directories(_robot_dynamics
+target_include_directories(_qros_franka_robot_dynamics_py
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/robot_dynamics>
         $<INSTALL_INTERFACE:include/robot_dynamics>)
 
-target_compile_definitions(_robot_dynamics PRIVATE IS_SAS_PYTHON_BUILD)
+target_compile_definitions(_qros_franka_robot_dynamics_py PRIVATE IS_SAS_PYTHON_BUILD)
 # https://github.com/pybind/pybind11/issues/387
-target_link_libraries(_robot_dynamics PRIVATE ${PROJECT_NAME}_robot_dynamics -ldqrobotics)
+target_link_libraries(_qros_franka_robot_dynamics_py PRIVATE ${PROJECT_NAME}_robot_dynamics -ldqrobotics)
 
-install(TARGETS _robot_dynamics
+install(TARGETS _qros_franka_robot_dynamics_py
         DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
 )
 ##END## PYBIND11 LIBRARY ROBOT_DYNAMICS #####

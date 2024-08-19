@@ -78,8 +78,7 @@ namespace qros
     }
 
 
-    void EffectorDriverFrankaHand::start_control_loop()
-    {
+    void EffectorDriverFrankaHand::start_control_loop() {
         sas::Clock clock = sas::Clock(configuration_.thread_sampeling_time_s);
         clock.init();
         RCLCPP_INFO_STREAM(node_->get_logger(),

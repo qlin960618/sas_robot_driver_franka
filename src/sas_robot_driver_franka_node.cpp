@@ -118,35 +118,33 @@ int main(int argc, char **argv)
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"Force upper limits scaling factor is not set.");
     }
 
-    try{node->declare_parameter<std::vector<double>>("upper_torque_threshold");}catch (...){}
-    if(node->has_parameter("upper_torque_threshold")) {
-        RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper torque threshold override and set.");
+    try {
         std::vector<double> upper_torque_threshold_std_vec;
         sas::get_ros_parameter(node,"upper_torque_threshold",upper_torque_threshold_std_vec);
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper torque threshold override and set.");
         franka_interface_configuration.upper_torque_threshold = std_vec_to_std_array<double,7>(upper_torque_threshold_std_vec);
-    }else {
+    }catch(...) {
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper torque threshold not set. Using default with value scalling.");
         franka_interface_configuration.upper_torque_threshold = apply_scale_to_std_array(franka_interface_configuration.upper_torque_threshold, upper_scale_factor);
     }
-    try{node->declare_parameter<std::vector<double>>("upper_force_threshold");}catch (...){}
-    if(node->has_parameter("upper_force_threshold")) {
+    try {
+        std::vector<double> upper_force_threshold_std_vec;
+        sas::get_ros_parameter(node,"upper_force_threshold",upper_force_threshold_std_vec);
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper force threshold override and set.");
-        std::vector<double> upper_torque_threshold_std_vec;
-        sas::get_ros_parameter(node,"upper_force_threshold",upper_torque_threshold_std_vec);
-        franka_interface_configuration.upper_force_threshold = std_vec_to_std_array<double,6>(upper_torque_threshold_std_vec);
-    }else {
-        RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper force threshold not set. Using default with value scalling.");
+        franka_interface_configuration.upper_force_threshold = std_vec_to_std_array<double,6>(upper_force_threshold_std_vec);
+    }catch(...) {
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Upper torque threshold not set. Using default with value scalling.");
         franka_interface_configuration.upper_force_threshold = apply_scale_to_std_array(franka_interface_configuration.upper_force_threshold, upper_scale_factor);
     }
-    try{node->declare_parameter<std::string>("robot_parameter_file_path");}catch (...){}
-    if(node->has_parameter("robot_parameter_file_path"))
-    {
+    try {
         std::string robot_parameter_file_path;
         sas::get_ros_parameter(node,"robot_parameter_file_path",robot_parameter_file_path);
         RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Loading robot parameters from file: " + robot_parameter_file_path);
         const auto robot = DQ_JsonReader::get_from_json<DQ_SerialManipulatorDH>(robot_parameter_file_path);
         robot_driver_franka_configuration.robot_reference_frame = robot.get_reference_frame();
-    }else{RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Robot parameter file path not set. Robot Model Unknow.");}
+    }catch(...) {
+        RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Robot parameter file path not set. Robot Model Unknow.");
+    }
 
     robot_driver_franka_configuration.interface_configuration = franka_interface_configuration;
 
