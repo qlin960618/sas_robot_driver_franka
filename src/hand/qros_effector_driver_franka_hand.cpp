@@ -81,8 +81,8 @@ namespace qros
     void EffectorDriverFrankaHand::start_control_loop() {
         sas::Clock clock = sas::Clock(configuration_.thread_sampeling_time_s);
         clock.init();
-        RCLCPP_INFO_STREAM(node_->get_logger(),
-            "["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::start_control_loop::Starting control loop.");
+        RCLCPP_INFO_STREAM(node_->get_logger(),"[EffectorDriverFrankaHand]::start_control_loop::Starting control loop.");
+        RCLCPP_WARN_STREAM(node_->get_logger(),"[EffectorDriverFrankaHand]::Gripper READY.");
         while (!(*break_loops_))
         {
             if (!_is_connected()) throw std::runtime_error("[" + std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::start_control_loop::Robot is not connected.");
@@ -140,7 +140,7 @@ namespace qros
         {
             throw std::runtime_error("[" + std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::gripper_homing::Failed to home the gripper.");
         }
-        RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::gripper_homing::Gripper homed.");
+        RCLCPP_INFO_STREAM(node_->get_logger(),"[EffectorDriverFrankaHand]::gripper_homing::Gripper homed.");
     }
 
     void EffectorDriverFrankaHand::initialize()
@@ -150,6 +150,14 @@ namespace qros
         gripper_homing();
         // start gripper status loop
         status_loop_thread_ = std::thread(&EffectorDriverFrankaHand::_gripper_status_loop, this);
+        // check status loop with timeout
+        auto time_now = std::chrono::system_clock::now();
+        auto time_out = time_now + std::chrono::seconds(5);
+        while (!status_loop_running_)
+        {
+            if (std::chrono::system_clock::now() > time_out){throw std::runtime_error("[" + std::string(node_->get_name()) + "]::[EffectorDriverFrankaHand]::initialize::Could not start status loop.");}
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
     }
 
     void EffectorDriverFrankaHand::deinitialize()
@@ -244,8 +252,7 @@ namespace qros
     {
         status_loop_running_ = true;
         sas::Clock clock = sas::Clock(configuration_.thread_sampeling_time_s);
-        RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Starting status loop.")
-        ;
+        RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Starting status loop.");
         clock.init();
         try
         {
