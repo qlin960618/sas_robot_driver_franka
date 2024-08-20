@@ -250,12 +250,12 @@ namespace qros
 
     void EffectorDriverFrankaHand::_gripper_status_loop()
     {
-        status_loop_running_ = true;
         sas::Clock clock = sas::Clock(configuration_.thread_sampeling_time_s);
         RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Starting status loop.");
         clock.init();
         try
         {
+            status_loop_running_ = true;
             while (status_loop_running_)
             {
 #ifdef BLOCK_READ_IN_USED
