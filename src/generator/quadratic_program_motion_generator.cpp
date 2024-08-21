@@ -1,4 +1,4 @@
-#include "generator/quadratic_program_motion_generator.h"
+#include <sas_robot_driver_franka/generator/quadratic_program_motion_generator.h>
 
 
 QuadraticProgramMotionGenerator::QuadraticProgramMotionGenerator(const double &speed_factor,

@@ -38,6 +38,7 @@
 #include <thread>
 #include <mutex>
 
+#include <franka/exception.h>
 // #define BLOCK_READ_IN_USED
 // #define IN_TESTING
 

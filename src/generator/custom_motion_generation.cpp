@@ -28,7 +28,7 @@
 #
 # ################################################################
 */
-#include "generator/custom_motion_generation.h"
+#include <sas_robot_driver_franka/generator/custom_motion_generation.h>
 
 /**
  * @brief CustomMotionGeneration::CustomMotionGeneration

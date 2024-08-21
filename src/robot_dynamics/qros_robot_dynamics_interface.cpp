@@ -27,7 +27,7 @@
 #
 # ################################################################
 */
-#include <robot_dynamic/qros_robot_dynamics_interface.h>
+#include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_interface.h>
 
 using namespace qros;
 

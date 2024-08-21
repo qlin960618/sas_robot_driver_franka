@@ -30,12 +30,8 @@
 # ################################################################
 */
 
+#include <sas_robot_driver_franka/sas_robot_driver_franka.h>
 
-#include "../../include/sas_robot_driver_franka.h"
-#include "sas_clock/sas_clock.h"
-#include <dqrobotics/utils/DQ_Math.h>
-#include <ros/this_node.h>
-#include <rosconsole/macros_generated.h>
 
 namespace sas
 {

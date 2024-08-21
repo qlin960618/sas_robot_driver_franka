@@ -39,8 +39,8 @@
 #include <sas_common/sas_common.h>
 #include <sas_conversions/eigen3_std_conversions.h>
 #include <sas_robot_driver/sas_robot_driver_ros.h>
-#include "sas_robot_driver_franka.h"
-#include <robot_dynamic/qros_robot_dynamics_provider.h>
+#include <sas_robot_driver_franka/sas_robot_driver_franka.h>
+#include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_provider.h>
 
 
 /*********************************************

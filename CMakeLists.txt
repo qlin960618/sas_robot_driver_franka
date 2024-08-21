@@ -117,7 +117,6 @@ target_link_libraries(robot_interface_hand Franka::Franka
 
 include_directories(
         include
-        include/generator
         src/
         src/robot_dynamics
         src/hand
@@ -199,7 +198,7 @@ target_link_libraries(JuankaEmika PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
 #####################################################################################
 # python binding
 include_directories(
-        include/robot_dynamic
+        include/sas_robot_driver_franka/robot_dynamic
 )
 pybind_add_module(_qros_robot_dynamic SHARED
         src/robot_dynamics/qros_robot_dynamic_py.cpp src/robot_dynamics/qros_robot_dynamics_interface.cpp src/robot_dynamics/qros_robot_dynamics_provider.cpp

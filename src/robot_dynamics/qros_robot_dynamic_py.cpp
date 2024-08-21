@@ -32,8 +32,8 @@
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
 
-#include <robot_dynamic/qros_robot_dynamics_provider.h>
-#include <robot_dynamic/qros_robot_dynamics_interface.h>
+#include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_provider.h>
+#include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_interface.h>
 
 namespace py = pybind11;
 using RDI = qros::RobotDynamicInterface;

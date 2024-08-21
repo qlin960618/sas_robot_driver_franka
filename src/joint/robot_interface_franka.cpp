@@ -30,7 +30,7 @@
 */
 
 
-#include "robot_interface_franka.h"
+#include <sas_robot_driver_franka/robot_interface_franka.h>
 
 #include <ros/this_node.h>
 #include <rosconsole/macros_generated.h>

@@ -43,12 +43,14 @@
 #include <sas_robot_driver/sas_robot_driver.h>
 #include "robot_interface_franka.h"
 #include <ros/common.h>
-#include <robot_dynamic/qros_robot_dynamics_provider.h>
+#include <sas_robot_driver_franka/robot_dynamic/qros_robot_dynamics_provider.h>
+#include <sas_clock/sas_clock.h>
+#include <dqrobotics/utils/DQ_Math.h>
+#include <ros/this_node.h>
+#include <rosconsole/macros_generated.h>
 
 using namespace DQ_robotics;
 using namespace Eigen;
-
-struct RobotInterfaceFranka::FrankaInterfaceConfiguration;  // Forward declaration
 
 namespace sas
 {

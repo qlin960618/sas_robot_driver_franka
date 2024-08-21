@@ -27,9 +27,8 @@
 #
 # ################################################################
 */
-#include "hand/qros_effector_driver_franka_hand.h"
+#include "qros_effector_driver_franka_hand.h"
 
-#include <franka/exception.h>
 
 
 namespace qros
