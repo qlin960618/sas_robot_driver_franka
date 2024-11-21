@@ -165,7 +165,7 @@ int main(int argc, char **argv)
     try
         {
             RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Instantiating Franka robot.");
-            auto robot_driver_franka = std::make_shared<sas::RobotDriverFranka>(
+            std::shared_ptr<sas::RobotDriverFranka> robot_driver_franka = std::make_shared<sas::RobotDriverFranka>(
                 node,
                 robot_dynamic_provider_ptr,
                 robot_driver_franka_configuration,
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
             robot_driver_franka -> set_joint_limits(joint_limits);
             RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Instantiating RobotDriverROS.");
             sas::RobotDriverROS robot_driver_ros(node,
-                                                robot_driver_franka, 
+                                                robot_driver_franka,
                                                 robot_driver_ros_configuration,
                                                 &kill_this_process);
             robot_driver_ros.control_loop();

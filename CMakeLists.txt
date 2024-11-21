@@ -23,6 +23,7 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(sas_robot_driver REQUIRED)
 find_package(Franka REQUIRED)
+find_package(pinocchio REQUIRED)
 find_package(sas_robot_driver_franka_interfaces REQUIRED)  # Add this line
 
 ## To correctly find and link with QT
@@ -91,7 +92,7 @@ install(
 ##### CPP LIBRARY Motion Generation  #####
 
 add_library(MotionGenerator src/generator/motion_generator.cpp)
-target_link_libraries(MotionGenerator Franka::Franka Eigen3::Eigen)
+target_link_libraries(MotionGenerator Franka::Franka pinocchio::pinocchio Eigen3::Eigen)
 
 add_library(ConstraintsManager constraints_manager/src/constraints_manager.cpp)
 target_link_libraries(ConstraintsManager Eigen3::Eigen)
@@ -126,6 +127,7 @@ target_link_libraries(CustomMotionGeneration
 
 add_library(robot_interface_franka src/joint/robot_interface_franka.cpp)
 target_link_libraries(robot_interface_franka Franka::Franka
+        pinocchio::pinocchio
         dqrobotics
         MotionGenerator
         ConstraintsManager
@@ -134,6 +136,7 @@ target_link_libraries(robot_interface_franka Franka::Franka
 
 add_library(robot_interface_hand src/hand/robot_interface_hand.cpp)
 target_link_libraries(robot_interface_hand Franka::Franka
+        pinocchio::pinocchio
         dqrobotics)
 
 
@@ -164,7 +167,9 @@ ament_target_dependencies(qros_effector_driver_franka_hand
 
 target_link_libraries(qros_effector_driver_franka_hand
         dqrobotics
-        Franka::Franka)
+        Franka::Franka
+        pinocchio::pinocchio
+)
 
 #target_include_directories(qros_effector_driver_franka_hand
 #        PUBLIC
