@@ -89,7 +89,7 @@ namespace qros
 
             if (!status_loop_running_)
             {
-                RCLCPP_WARN_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_is_connected::Status loop is not running.");
+                RCLCPP_WARN_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_is_connected::Status loop is not running.");
                 break_loops_->store(true);
                 break;
             }
@@ -97,14 +97,14 @@ namespace qros
             clock.update_and_sleep();
             spin_some(node_);
         }
-        RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::start_control_loop::Exiting control loop.");
+        RCLCPP_INFO_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::start_control_loop::Exiting control loop.");
     }
 
 
     void EffectorDriverFrankaHand::connect()
     {
 #ifdef IN_TESTING
-        RCLCPP_WARN_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::connect::In testing mode. to DUMMY");
+        RCLCPP_WARN_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::connect::In testing mode. to DUMMY");
         return;
 #endif
         gripper_sptr_ = std::make_shared<franka::Gripper>(configuration_.robot_ip);
@@ -116,10 +116,10 @@ namespace qros
     void EffectorDriverFrankaHand::disconnect() noexcept
     {
 #ifdef IN_TESTING
-        RCLCPP_WARN_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::disconnect::In testing mode. from DUMMY");
+        RCLCPP_WARN_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::disconnect::In testing mode. from DUMMY");
         return;
 #endif
-        RCLCPP_WARN_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::disconnecting...");
+        RCLCPP_WARN_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::disconnecting...");
         gripper_sptr_->~Gripper();
         gripper_sptr_ = nullptr;
     }
@@ -130,7 +130,7 @@ namespace qros
     void EffectorDriverFrankaHand::gripper_homing()
     {
 #ifdef IN_TESTING
-        RCLCPP_WARN_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::gripper_homing::In testing mode.");
+        RCLCPP_WARN_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::gripper_homing::In testing mode.");
         return;
 #endif
         if (!_is_connected()) throw std::runtime_error(
@@ -163,7 +163,7 @@ namespace qros
     void EffectorDriverFrankaHand::deinitialize()
     {
 #ifdef IN_TESTING
-        RCLCPP_WARN_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::deinitialize::In testing mode.");
+        RCLCPP_WARN_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::deinitialize::In testing mode.");
         return;
 #endif
         if (_is_connected())
@@ -179,7 +179,7 @@ namespace qros
 
     bool EffectorDriverFrankaHand::_grasp_srv_callback(const std::shared_ptr<srv::Grasp::Request> req, std::shared_ptr<srv::Grasp::Response> res)
     {
-        RCLCPP_DEBUG_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::Grasping...");
+        RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_grasp_srv_callback::Grasping...");
         auto force = req->force;
         auto speed = req->speed;
         auto epsilon_inner = req->epsilon_inner;
@@ -188,8 +188,8 @@ namespace qros
         if (speed <= 0.0) speed = configuration_.default_speed;
         if (epsilon_inner <= 0.0) epsilon_inner = configuration_.default_epsilon_inner;
         if (epsilon_outer <= 0.0) epsilon_outer = configuration_.default_epsilon_outer;
-        RCLCPP_DEBUG_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::Width: " + std::to_string(req->width));
-        RCLCPP_DEBUG_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::force: " + std::to_string(force) + " speed: " + std::to_string(speed));
+        RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_grasp_srv_callback::Width: " + std::to_string(req->width));
+        RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_grasp_srv_callback::force: " + std::to_string(force) + " speed: " + std::to_string(speed));
         bool ret = false;
         bool function_ret = true;
         gripper_in_use_.lock();
@@ -202,11 +202,11 @@ namespace qros
             ret = gripper_sptr_->grasp(req->width, speed, force, epsilon_inner, epsilon_outer);
         }catch(franka::CommandException& e)
         {
-            RCLCPP_ERROR_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::CommandException::" + e.what());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_grasp_srv_callback::CommandException::" + std::string(e.what()));
             function_ret = false;
         }catch(franka::NetworkException& e)
         {
-            RCLCPP_ERROR_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_grasp_srv_callback::NetworkException::" + e.what());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_grasp_srv_callback::NetworkException::" + std::string(e.what()));
             function_ret = false;
         }
 #endif
@@ -218,10 +218,10 @@ namespace qros
 
     bool EffectorDriverFrankaHand::_move_srv_callback(const std::shared_ptr<srv::Move::Request> req, std::shared_ptr<srv::Move::Response> res)
     {
-        RCLCPP_DEBUG_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_move_srv_callback::Moving...");
+        RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_move_srv_callback::Moving...");
         auto speed = req->speed;
         if (speed <= 0.0) speed = configuration_.default_speed;
-        RCLCPP_DEBUG_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_move_srv_callback::Speed: " + std::to_string(speed) + " Width: " + std::to_string(req->width));
+        RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_move_srv_callback::Speed: " + std::to_string(speed) + " Width: " + std::to_string(req->width));
         bool ret = false;
         bool function_ret = true;
         gripper_in_use_.lock();
@@ -234,11 +234,11 @@ namespace qros
             ret = gripper_sptr_->move(req->width, speed);
         }catch(franka::CommandException& e)
         {
-            RCLCPP_ERROR_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_move_srv_callback::CommandException::" + e.what());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_move_srv_callback::CommandException::" + std::string(e.what()));
             function_ret = false;
         }catch(franka::NetworkException& e)
         {
-            RCLCPP_ERROR_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_move_srv_callback::NetworkException::" + e.what());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_move_srv_callback::NetworkException::" + std::string(e.what()));
             function_ret = false;
         }
 #endif
@@ -251,47 +251,37 @@ namespace qros
     void EffectorDriverFrankaHand::_gripper_status_loop()
     {
         sas::Clock clock = sas::Clock(configuration_.thread_sampeling_time_s);
-        RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Starting status loop.");
+        RCLCPP_INFO_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_gripper_status_loop::Starting status loop.");
         clock.init();
         try
         {
             status_loop_running_ = true;
             while (status_loop_running_)
             {
-#ifdef BLOCK_READ_IN_USED
-                bool should_unlock = false;
-#endif
-                if (!_is_connected()) throw std::runtime_error(
-                    "[" + std::string(node_->get_name())+
-                    "]::[EffectorDriverFrankaHand]::_gripper_status_loop::Robot is not connected.");
+                if (!_is_connected()) throw std::runtime_error("[" + std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Robot is not connected.");
                 try
                 {
 #ifdef IN_TESTING
-                    RCLCPP_WARN_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::In testing mode.");
+                    RCLCPP_WARN_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_gripper_status_loop::In testing mode.");
                     throw std::runtime_error("[" + std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::In testing mode.");
 #endif
-#ifdef BLOCK_READ_IN_USED
-                    gripper_in_use_.lock();
-                    should_unlock = true;
-#endif
-                    franka::GripperState gripper_state = gripper_sptr_->readOnce();
-#ifdef BLOCK_READ_IN_USED
-                    gripper_in_use_.unlock();
-#endif
                     msg::GripperState msg;
-                    msg.set__width(static_cast<float>(gripper_state.width));
-                    msg.set__max_width(static_cast<float>(gripper_state.max_width));
-                    msg.set__is_grasped(gripper_state.is_grasped);
-                    msg.set__temperature(gripper_state.temperature);
-                    msg.set__duration_ms(gripper_state.time.toMSec());
+                    {
+#ifdef BLOCK_READ_IN_USED
+                        std::lock_guard<std::mutex> lock(gripper_in_use_);
+#endif
+                        franka::GripperState gripper_state = gripper_sptr_->readOnce();
+                        msg.set__width(static_cast<float>(gripper_state.width));
+                        msg.set__max_width(static_cast<float>(gripper_state.max_width));
+                        msg.set__is_grasped(gripper_state.is_grasped);
+                        msg.set__temperature(gripper_state.temperature);
+                        msg.set__duration_ms(gripper_state.time.toMSec());
+                    }
                     gripper_status_publisher_->publish(msg);
                 }
                 catch (...)
                 {
-#ifdef BLOCK_READ_IN_USED
-                    if (should_unlock) gripper_in_use_.unlock();
-#endif
-                    RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Could not read gripper state. Unavailable.");
+                    RCLCPP_INFO_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_gripper_status_loop::Could not read gripper state. Unavailable.");
                     msg::GripperState msg;
                     msg.width = 0.0;
                     gripper_status_publisher_->publish(msg);
@@ -303,16 +293,14 @@ namespace qros
         }
         catch (std::exception& e)
         {
-            RCLCPP_ERROR_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Exception::" + e.
-                what());
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_gripper_status_loop::Exception::" + std::string(e.what()));
             status_loop_running_ = false;
         }
         catch (...)
         {
-            RCLCPP_ERROR_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+
-                "]::[EffectorDriverFrankaHand]::_gripper_status_loop::Exception::Unknown exception.");
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_gripper_status_loop::Exception::Unknown exception.");
             status_loop_running_ = false;
         }
-        RCLCPP_INFO_STREAM(node_->get_logger(),"["+ std::string(node_->get_name())+"]::[EffectorDriverFrankaHand]::_gripper_status_loop::Exiting status loop.");
+        RCLCPP_INFO_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_gripper_status_loop::Exiting status loop.");
     }
 } // qros
