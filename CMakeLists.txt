@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(sas_common REQUIRED)
 find_package(sas_core REQUIRED)
 find_package(sas_msgs REQUIRED)
@@ -156,7 +157,7 @@ target_link_libraries(sas_robot_driver_franka
 add_library(qros_effector_driver_franka_hand src/hand/qros_effector_driver_franka_hand.cpp)
 
 ament_target_dependencies(qros_effector_driver_franka_hand
-        rclcpp sas_common sas_core
+        rclcpp sas_common sas_core std_srvs
         sas_robot_driver_franka_interfaces
 )
 

@@ -56,7 +56,7 @@
 #include <sas_robot_driver_franka_interfaces/srv/move.hpp>
 #include <sas_robot_driver_franka_interfaces/msg/gripper_state.hpp>
 #endif
-
+#include <std_srvs/srv/trigger.hpp>
 
 // using namespace DQ_robotics;
 // using namespace Eigen;
@@ -99,17 +99,23 @@ private:
     std::mutex gripper_in_use_;
     Service<srv::Grasp>::SharedPtr grasp_srv_;
     Service<srv::Move>::SharedPtr move_srv_;
+    Service<std_srvs::srv::Trigger>::SharedPtr homing_srv_;
 
 public:
 
     bool _grasp_srv_callback(
-        const std::shared_ptr<srv::Grasp::Request> req,
+        const std::shared_ptr<srv::Grasp::Request> &req,
         std::shared_ptr<srv::Grasp::Response> res
         );
 
     bool _move_srv_callback(
-        const std::shared_ptr<srv::Move::Request> req,
+        const std::shared_ptr<srv::Move::Request> &req,
         std::shared_ptr<srv::Move::Response> res
+        );
+
+    bool _home_srv_callback(
+        const std::shared_ptr<std_srvs::srv::Trigger::Request> &req,
+        std::shared_ptr<std_srvs::srv::Trigger::Response> res
         );
 
     EffectorDriverFrankaHand(const EffectorDriverFrankaHand&)=delete;

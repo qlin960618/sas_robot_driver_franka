@@ -63,6 +63,8 @@ namespace qros
             std::bind(&EffectorDriverFrankaHand::_grasp_srv_callback, this, _1, _2));
         move_srv_ = node->create_service<srv::Move>(driver_node_prefix_ + "/move",
             std::bind(&EffectorDriverFrankaHand::_move_srv_callback, this, _1, _2));
+        homing_srv_ = node->create_service<std_srvs::srv::Trigger>(driver_node_prefix_ + "/homing",
+            std::bind(&EffectorDriverFrankaHand::_home_srv_callback, this, _1, _2));
         gripper_status_publisher_ = node->create_publisher<msg::GripperState>(
             driver_node_prefix_ + "/gripper_status", 1);
     }
@@ -177,7 +179,7 @@ namespace qros
     }
 
 
-    bool EffectorDriverFrankaHand::_grasp_srv_callback(const std::shared_ptr<srv::Grasp::Request> req, std::shared_ptr<srv::Grasp::Response> res)
+    bool EffectorDriverFrankaHand::_grasp_srv_callback(const std::shared_ptr<srv::Grasp::Request> &req, std::shared_ptr<srv::Grasp::Response> res)
     {
         RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_grasp_srv_callback::Grasping...");
         auto force = req->force;
@@ -192,13 +194,13 @@ namespace qros
         RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_grasp_srv_callback::force: " + std::to_string(force) + " speed: " + std::to_string(speed));
         bool ret = false;
         bool function_ret = true;
-        gripper_in_use_.lock();
 #ifdef IN_TESTING
         ret = true;
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 #else
         try
         {
+            std::lock_guard<std::mutex> lock(gripper_in_use_);
             ret = gripper_sptr_->grasp(req->width, speed, force, epsilon_inner, epsilon_outer);
         }catch(franka::CommandException& e)
         {
@@ -210,13 +212,12 @@ namespace qros
             function_ret = false;
         }
 #endif
-        gripper_in_use_.unlock();
         res->set__success(ret);
         return function_ret;
     }
 
 
-    bool EffectorDriverFrankaHand::_move_srv_callback(const std::shared_ptr<srv::Move::Request> req, std::shared_ptr<srv::Move::Response> res)
+    bool EffectorDriverFrankaHand::_move_srv_callback(const std::shared_ptr<srv::Move::Request> &req, std::shared_ptr<srv::Move::Response> res)
     {
         RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_move_srv_callback::Moving...");
         auto speed = req->speed;
@@ -224,13 +225,13 @@ namespace qros
         RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_move_srv_callback::Speed: " + std::to_string(speed) + " Width: " + std::to_string(req->width));
         bool ret = false;
         bool function_ret = true;
-        gripper_in_use_.lock();
 #ifdef IN_TESTING
         ret = true;
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 #else
         try
         {
+            std::lock_guard<std::mutex> lock(gripper_in_use_);
             ret = gripper_sptr_->move(req->width, speed);
         }catch(franka::CommandException& e)
         {
@@ -242,7 +243,38 @@ namespace qros
             function_ret = false;
         }
 #endif
-        gripper_in_use_.unlock();
+        res->set__success(ret);
+        return function_ret;
+    }
+
+
+    bool EffectorDriverFrankaHand::_home_srv_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> &req, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+    {
+        RCLCPP_DEBUG_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_home_srv_callback::Homing...");
+        bool ret = false;
+        bool function_ret = true;
+#ifdef IN_TESTING
+        ret = true;
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+#else
+        try
+        {
+            std::lock_guard<std::mutex> lock(gripper_in_use_);
+            ret = gripper_sptr_->homing();
+        }catch(franka::CommandException& e)
+        {
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_home_srv_callback::CommandException::" + std::string(e.what()));
+            res->set__message("_home_srv_callback::CommandException::" + std::string(e.what()));
+            function_ret = false;
+            ret = false;
+        }catch(franka::NetworkException& e)
+        {
+            RCLCPP_ERROR_STREAM(node_->get_logger(),"::[EffectorDriverFrankaHand]::_home_srv_callback::NetworkException::" + std::string(e.what()));
+            res->set__message("_home_srv_callback::NetworkException::" + std::string(e.what()));
+            function_ret = false;
+            ret = false;
+        }
+#endif
         res->set__success(ret);
         return function_ret;
     }
