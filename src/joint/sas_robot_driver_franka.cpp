@@ -50,7 +50,7 @@ namespace sas
    {
         joint_positions_.resize(7);
         joint_velocities_.resize(7);
-        joint_forces_.resize(7);
+        joint_torques_.resize(7);
         //end_effector_pose_.resize(7);
         //joint_positions_buffer_.resize(8,0);
         //end_effector_pose_euler_buffer_.resize(7,0);
@@ -193,7 +193,7 @@ namespace sas
      */
     void RobotDriverFranka::set_target_joint_velocities(const VectorXd &desired_joint_velocities)
     {
-        desired_joint_velocities_ = desired_joint_velocities;
+        // desired_joint_velocities_ = desired_joint_velocities;
         robot_driver_interface_sptr_->set_target_joint_velocities(desired_joint_velocities);
         if(robot_driver_interface_sptr_->get_err_state()) {
             RCLCPP_ERROR_STREAM(node_->get_logger(),
@@ -207,10 +207,10 @@ namespace sas
      * @brief RobotDriverFranka::get_joint_forces
      * @return
      */
-    VectorXd RobotDriverFranka::get_joint_forces()
+    VectorXd RobotDriverFranka::get_joint_torques()
     {
-        joint_forces_ = robot_driver_interface_sptr_->get_joint_forces();
-        return joint_forces_;
+        joint_torques_ = robot_driver_interface_sptr_->get_joint_forces();
+        return joint_torques_;
     }
 
 }

@@ -113,7 +113,7 @@ public:
     VectorXd get_joint_velocities() override;
     void set_target_joint_velocities(const VectorXd& desired_joint_velocities) override;
 
-    VectorXd get_joint_forces() override;
+    VectorXd get_joint_torques() override;
 
     void connect() override;
     void disconnect() override;
