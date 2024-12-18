@@ -149,7 +149,9 @@ namespace qros
     {
         if (!_is_connected()) throw std::runtime_error(
             "[" + std::string(node_->get_name())+ "]::[EffectorDriverFrankaHand]::initialize::Robot is not connected.");
-        gripper_homing();
+        if (configuration_.initialize_with_homing) {
+            gripper_homing();
+        }
         // start gripper status loop
         status_loop_thread_ = std::thread(&EffectorDriverFrankaHand::_gripper_status_loop, this);
         // check status loop with timeout
