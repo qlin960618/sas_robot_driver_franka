@@ -53,10 +53,10 @@ void sig_int_handler(int)
 template<typename T>
 void get_optional_parameter(std::shared_ptr<Node> node, const std::string &param_name, T &param)
 {
-    if(node->has_parameter(param_name))
+    try
     {
         sas::get_ros_parameter(node,param_name,param);
-    }else
+    }catch (const std::exception& e)
     {
         RCLCPP_INFO_STREAM(node->get_logger(), "["+std::string(node->get_name())+"]:Parameter " + param_name + " not found. Using default value. " + std::to_string(param));
     }
