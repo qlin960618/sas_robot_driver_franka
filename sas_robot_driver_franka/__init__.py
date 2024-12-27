@@ -9,6 +9,7 @@ from rclpy.node import Node
 from rclpy.client import Client
 from sas_common import rclcpp_init, rclcpp_Node, rclcpp_spin_some, rclcpp_shutdown
 from sas_robot_driver_franka_interfaces.srv import Move, Grasp
+from std_srvs.srv import Trigger
 from sas_robot_driver_franka_interfaces.msg import GripperState
 import os
 import threading
@@ -27,12 +28,15 @@ class FrankaGripperInterface:
     """
 
     def __init__(self, node: Node, robot_prefix):
+        self.last_message = None
         self.robot_prefix = robot_prefix
         self.node = node
         self.move_service = node.create_client(Move, os.path.join(robot_prefix, MOVE_TOPIC_SUFFIX))
         self._moving = False
         self.grasp_service = node.create_client(Grasp, os.path.join(robot_prefix, GRASP_TOPIC_SUFFIX))
         self._grasping = False
+        self.home_service = node.create_client(Trigger, os.path.join(robot_prefix, "homing"))
+        self._homing = False
         self.status_subscriber = node.create_subscription(GripperState, os.path.join(robot_prefix, STATUS_TOPIC_SUFFIX),
                                                           self._status_callback, 10)
 
@@ -71,6 +75,14 @@ class FrankaGripperInterface:
         self.state_max_width = msg.max_width
         self.state_temperature = msg.temperature
         self.state_is_grasped = msg.is_grasped
+    def home(self):
+        """
+        Reinitialize the gripper
+        :return: None
+        """
+        if self.is_busy():
+            raise Exception("Gripper is already moving or grasping, please wait until the previous action is finished")
+        self._home()
 
     def move(self, width, speed=0):
         """
@@ -158,14 +170,19 @@ class FrankaGripperInterface:
                     self._moving = False
                 elif isinstance(response, Grasp.Response):
                     self._grasping = False
+                elif isinstance(response, Trigger.Response):
+                    self._homing = False
                 else:
                     raise Exception("Invalid response type")
                 self.service_future = None
+                self.last_message = hasattr(response, "message") and response.message or ""
                 return response.success
             else:
                 raise Exception("No result available")
         else:
             raise Exception("No result available")
+    def get_last_message(self):
+        return self.last_message
 
     def wait_until_done(self):
         """
@@ -179,6 +196,12 @@ class FrankaGripperInterface:
         while not self.is_done():
             self.spin_handler()
             time.sleep(0.01)
+    def _home(self):
+        self._homing = True
+        # self.node.get_logger().info("Homing gripper")
+        request = Trigger.Request()
+        # self.node.get_logger().info("Calling home service")
+        self.service_future = self.home_service.call_async(request)
 
     def _move(self, width, speed):
         self._moving = True

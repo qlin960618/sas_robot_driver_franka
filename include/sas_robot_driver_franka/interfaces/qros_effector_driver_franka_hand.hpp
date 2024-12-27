@@ -69,6 +69,7 @@ namespace qros {
 struct EffectorDriverFrankaHandConfiguration
 {
     std::string robot_ip;
+    bool initialize_with_homing = true;
     double thread_sampeling_time_s = 1e8;  // 10Hz
     double default_force = 3.0;
     double default_speed = 0.1;

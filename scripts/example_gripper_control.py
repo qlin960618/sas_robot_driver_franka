@@ -1,6 +1,5 @@
 import threading
 
-from sas_common import rclcpp_init, rclcpp_Node, rclcpp_spin_some, rclcpp_shutdown
 import rclpy
 from sas_robot_driver_franka import FrankaGripperInterface
 import time
@@ -14,13 +13,11 @@ def main_loop(node):
 
     while not hand1.is_enabled():
         logger.info("Waiting for gripper to be enabled...")
-        rclcpp_spin_some(node)
         time.sleep(0.1)
     rclpy.node.get_logger(node_name).info("Gripper enabled!")
 
     def spin_all(node_):
         while rclpy.ok():
-            rclcpp_spin_some(node_)
             rclpy.spin_once(node_, timeout_sec=0.1)
             time.sleep(0.1)
             

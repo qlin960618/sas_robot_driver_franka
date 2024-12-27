@@ -53,10 +53,10 @@ void sig_int_handler(int)
 template<typename T>
 void get_optional_parameter(std::shared_ptr<Node> node, const std::string &param_name, T &param)
 {
-    if(node->has_parameter(param_name))
+    try
     {
         sas::get_ros_parameter(node,param_name,param);
-    }else
+    }catch (const std::exception& e)
     {
         RCLCPP_INFO_STREAM(node->get_logger(), "["+std::string(node->get_name())+"]:Parameter " + param_name + " not found. Using default value. " + std::to_string(param));
     }
@@ -81,6 +81,7 @@ int main(int argc, char **argv)
     RCLCPP_INFO_STREAM_ONCE(node->get_logger(),"["+node_name+"]::Loading parameters from parameter server.");
 
     qros::EffectorDriverFrankaHandConfiguration robot_driver_franka_hand_configuration;
+    get_optional_parameter(node, "initialize_with_homing", robot_driver_franka_hand_configuration.initialize_with_homing);
     sas::get_ros_parameter(node,"robot_ip_address",robot_driver_franka_hand_configuration.robot_ip);
     sas::get_ros_parameter(node,"thread_sampling_time_sec",robot_driver_franka_hand_configuration.thread_sampeling_time_s);
     sas::get_ros_parameter(node,"default_force",robot_driver_franka_hand_configuration.default_force);
