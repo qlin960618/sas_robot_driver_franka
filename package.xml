@@ -4,7 +4,7 @@
   <name>sas_robot_driver_franka</name>
   <version>0.0.0</version>
   <description>The sas_driver_franka package</description>
-  <maintainer email="moonshot@todo.todo">moonshot</maintainer>
+  <maintainer email="qlin1806@g.ecc.u-tokyo.ac.jp">qlin</maintainer>
 
   <license>LGPLv3</license>
   <buildtool_depend>ament_cmake</buildtool_depend>

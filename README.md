@@ -79,6 +79,6 @@ Digital twin mirroring node for driver node to CoppeliaSim
 "vrep_joint_names": ["Franka_joint1#1", "Franka_joint2#1", "Franka_joint3#1", "Franka_joint4#1",
                      "Franka_joint5#1", "Franka_joint6#1", "Franka_joint7#1"]  # coppelia scene joint names
 "robot_topic_prefix": "/arm3"  # robot driver namespace
-"robot_mode": "VelocityControl"  # only use when in simulation node, aka using_real_robot==False, for simulating velocity control mode. (TODO: currently not stable)
+"robot_mode": "PositionControl"  # only use when in simulation node, aka using_real_robot==False, for simulating velocity control mode. (TODO: currently VelocityControl is not stable)
 "robot_parameter_file_path": os.environ["ROBOT_3_JSON_PATH"]  # Robot definition JSON path
 ```
